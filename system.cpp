@@ -1,6 +1,9 @@
 #include <system.h>
 #include <integrators/integrator.h>
 #include <potentials/potential.h>
+#include <iostream>
+
+using namespace std;
 
 System::System() :
     m_potential(0),
@@ -20,6 +23,38 @@ System::~System()
 
 void System::applyPeriodicBoundaryConditions() {
     // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
+
+    double xLength =  m_systemSize.x;     // Vectors that should shift the atom one systemsize to the side when it
+    double yLength =  m_systemSize.y;    // when it goes over it.
+    double zLength =  m_systemSize.z;
+
+    int k = 0;
+
+    for(int i = 0; i < m_atoms.size(); i++)
+    {
+        //Takes all the for atoms and shifts them to the other side if
+        //if they overstep the boundary
+
+        if(m_atoms[i]->position.x > xLength)
+            m_atoms[i]->position.x -= xLength;
+
+        if(m_atoms[i]->position.x < 0)
+            m_atoms[i]->position.x += xLength;
+
+        if(m_atoms[i]->position.y > yLength)
+            m_atoms[i]->position.y -= yLength;
+
+        if(m_atoms[i]->position.y < 0)
+            m_atoms[i]->position.y += yLength;
+
+        if(m_atoms[i]->position.z > zLength)
+            m_atoms[i]->position.z -= zLength;
+
+        if(m_atoms[i]->position.z < 0)
+            m_atoms[i]->position.z += zLength;
+    };
+
+    return;
 }
 
 void System::removeMomentum() {

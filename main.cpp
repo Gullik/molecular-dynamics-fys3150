@@ -35,6 +35,7 @@ int main()
         atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(300));
         atom->position.randomUniform(0, system.systemSize().x);
         system.atoms().push_back(atom); // Add it to the list of atoms
+
     }
 
     StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
@@ -42,14 +43,16 @@ int main()
     IO *movie = new IO(); // To write the state to file
     movie->open("movie.xyz");
 
-    for(int timestep=0; timestep<1000; timestep++) {
+    for(int timestep=0; timestep<10000; timestep++) {
         system.step(dt);
         statisticsSampler->sample(&system);
-
+        system.applyPeriodicBoundaryConditions();
         movie->saveState(&system);
     }
 
     movie->close();
+
+
 
     return 0;
 }
