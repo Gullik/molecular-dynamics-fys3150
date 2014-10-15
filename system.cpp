@@ -59,6 +59,26 @@ void System::applyPeriodicBoundaryConditions() {
 
 void System::removeMomentum() {
     // Initially, when the atoms are given random velocities, there is a non-zero net momentum. We don't want any drift in the system, so we need to remove it.
+
+    cout <<"Atom 0 has velocities before" <<m_atoms[0]->velocity << endl;
+
+    vec3 momentum = vec3();
+
+    for(int i = 0; i < m_atoms.size(); i ++)
+        momentum = momentum + m_atoms[i]->velocity;
+
+    cout << "The total momentum us:  "<< momentum << endl;
+
+    for(int i = 0; i < m_atoms.size(); i ++)
+    {
+        m_atoms[i]->velocity.x = m_atoms[i]->velocity.x - (momentum.x / m_atoms.size());
+        m_atoms[i]->velocity.y = m_atoms[i]->velocity.y - (momentum.y / m_atoms.size());
+        m_atoms[i]->velocity.z = m_atoms[i]->velocity.z - (momentum.z / m_atoms.size());
+    }
+    cout <<"Atom 0 has velocities after" << m_atoms[0]->velocity<< endl;
+
+
+
 }
 
 void System::resetForcesOnAllAtoms() {
