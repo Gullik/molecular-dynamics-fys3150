@@ -22,15 +22,18 @@ int main()
     cout << "One unit of temperature is " << UnitConverter::temperatureToSI(1.0) << " K" << endl;
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
 
+    double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);
+    int gridLength = 2;
+
 
     System system;
-    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(10, 10, 10)));
-    system.createFCCLattice(2, UnitConverter::lengthFromAngstroms(5.26));
+    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(gridLength * latticeConstant, gridLength * latticeConstant, gridLength * latticeConstant)));
+    system.createFCCLattice(gridLength, latticeConstant);
     system.setPotential(new LennardJones(1.0, 1.0)); // You must insert correct parameters here
     system.setIntegrator(new EulerCromer());
     system.removeMomentum();
 
-    cout << "Number of atoms created: " << system.atoms().size() << endl;
+
 
 
 //    for(int n=0; n<100; n++) {
@@ -49,10 +52,10 @@ int main()
     IO *movie = new IO(); // To write the state to file
     movie->open("../molecular-dynamics-fys3150/movie.xyz");
 
-    for(int timestep=0; timestep<100; timestep++) {
+    for(int timestep=0; timestep<1000; timestep++) {
         system.step(dt);
         statisticsSampler->sample(&system);
-        system.applyPeriodicBoundaryConditions();
+ //       system.applyPeriodicBoundaryConditions();
         movie->saveState(&system);
     }
 

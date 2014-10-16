@@ -30,7 +30,6 @@ void System::applyPeriodicBoundaryConditions() {
     double yLength =  m_systemSize.y;    // when it goes over it.
     double zLength =  m_systemSize.z;
 
-    int k = 0;
 
     for(int i = 0; i < m_atoms.size(); i++)
     {
@@ -87,8 +86,6 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
     // This function creates Nx*Ny*Nz cells and places four atoms, for each cell in a crystalline lattice
     // in those cells
 
-    cout << latticeConstant << endl;
-
     //Initialize the atoms and store pointers to them in the system->atoms list.
     //We need four atoms for each cell
     for(int i = 0; i < 4*pow(numberOfUnitCellsEachDimension, 3); i++)
@@ -98,13 +95,13 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
         atoms().push_back(atom);
     }
 
+    int latticeNumber = 0;
+
     vec3 r_1 = vec3(0,0,0);
     vec3 r_2 = vec3(latticeConstant/2 , latticeConstant/2.0 , 0 );
     vec3 r_3 = vec3(0 , latticeConstant/2.0 , latticeConstant/2 );
     vec3 r_4 = vec3(latticeConstant/2 , 0 , latticeConstant/2.0 );
 
-
-    cout << r_2 << endl;
 
     for(int i = 0; i < numberOfUnitCellsEachDimension ; i++)
     {
@@ -115,15 +112,25 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
                 //Four atoms need to be put in each lattice cell, they have the position:R_ij = R_i + r_j;
                 //where R_ij are their position, R_i is the lattice position and r_j is the position in the lattice
 
-                int latticeNumber = i+j+k;
-                m_atoms[4*latticeNumber]->position = vec3(i,j,k)*latticeConstant + r_1;
-                m_atoms[4*latticeNumber + 1]->position = vec3(i,j,k)*latticeConstant + r_2;
-                m_atoms[4*latticeNumber + 2]->position = vec3(i,j,k)*latticeConstant + r_3;
-                m_atoms[4*latticeNumber + 3]->position = vec3(i,j,k)*latticeConstant + r_4;
+
+
+                m_atoms[latticeNumber]->position = vec3(i,j,k)*latticeConstant + r_1;
+                m_atoms[latticeNumber + 1]->position = vec3(i,j,k)*latticeConstant + r_2;
+                m_atoms[latticeNumber + 2]->position = vec3(i,j,k)*latticeConstant + r_3;
+                m_atoms[latticeNumber + 3]->position = vec3(i,j,k)*latticeConstant + r_4;
+
+                latticeNumber += 4;
+
+                cout << latticeNumber << endl;
 
             }
         }
     }
+
+    cout << m_atoms.size() << endl;
+
+    for(int k = 0 ;k < m_atoms.size();k++)
+        cout << m_atoms[k]->position << endl;
 
 
 }
