@@ -33,12 +33,14 @@ int main()
                                                                  gridLength * latticeConstant,
                                                                  gridLength * latticeConstant)));
     system.createFCCLattice(gridLength, latticeConstant);
-    system.setPotential(new LennardJones(1.0, 1.0)); // You must insert correct parameters here
+    system.setPotential(new LennardJones(UnitConverter::temperatureFromSI(119.8),
+                                         UnitConverter::lengthFromAngstroms(3.405)
+                                            )); // Se report for values
 //    system.setIntegrator(new EulerCromer());
     system.setIntegrator(new VelocityVerlet());
     system.removeMomentum();
 
-//    cout << system.atoms()[1]->force << endl;
+
 
 
 
@@ -65,6 +67,9 @@ int main()
     }
 
     movie->close();
+
+    for(int i = 0; i < system.atoms().size(); i++)
+        cout << system.atoms()[i]->force << endl;
 
 
 

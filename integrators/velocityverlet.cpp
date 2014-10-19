@@ -47,7 +47,9 @@ void VelocityVerlet::move(System *system, double dt)
 
 void VelocityVerlet::integrate(System *system, double dt)
 {
-    if(m_firstStep) {
+    system->calculateForces();
+
+    if(m_firstStep) {           // Do not know the purpose of first kick thought?
         firstKick(system, dt);
         m_firstStep = false;
     }
@@ -57,7 +59,7 @@ void VelocityVerlet::integrate(System *system, double dt)
 
     system->applyPeriodicBoundaryConditions();  //Put's them inside the boundary again
 
-    //Calculate forces      //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
+    system->calculateForces();      //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
 
     halfKick(system, dt);   //Kicks the second half of the step v(t+dt)=v(t+dt/2) + F(t+dt)/m*dt/2
 
