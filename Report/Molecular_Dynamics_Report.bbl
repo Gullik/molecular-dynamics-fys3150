@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{Wiki}
+Wikipedia \url{http://en.wikipedia.org/wiki/Lennard-Jones_potential}.
+
+\bibitem{compPhys}
+Morten Hjorth-Jensen.
+\newblock Computational physics lecture notes fall 2014.
+
+\bibitem{aBInitio}
+Dominik Marx and Jurg Hutter.
+\newblock Ab initio molecular dynamics: Theory and implementation, 2009.
+
+\end{thebibliography}

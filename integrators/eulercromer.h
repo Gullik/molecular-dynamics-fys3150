@@ -9,3 +9,5 @@ public:
     ~EulerCromer() {}
     virtual void integrate(System* system, double timestep);
 };
+
+

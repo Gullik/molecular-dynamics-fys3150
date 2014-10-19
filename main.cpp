@@ -3,6 +3,8 @@
 
 #include <potentials/lennardjones.h>
 #include <integrators/eulercromer.h>
+#include <integrators/velocityverlet.h>
+
 #include <system.h>
 #include <statisticssampler.h>
 #include <atom.h>
@@ -23,16 +25,20 @@ int main()
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
 
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);
-    int gridLength = 2;
+    int gridLength = 1;
 
 
     System system;
-    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(gridLength * latticeConstant, gridLength * latticeConstant, gridLength * latticeConstant)));
+    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(gridLength * latticeConstant,
+                                                                 gridLength * latticeConstant,
+                                                                 gridLength * latticeConstant)));
     system.createFCCLattice(gridLength, latticeConstant);
     system.setPotential(new LennardJones(1.0, 1.0)); // You must insert correct parameters here
-    system.setIntegrator(new EulerCromer());
+//    system.setIntegrator(new EulerCromer());
+    system.setIntegrator(new VelocityVerlet());
     system.removeMomentum();
 
+//    cout << system.atoms()[1]->force << endl;
 
 
 
@@ -52,10 +58,9 @@ int main()
     IO *movie = new IO(); // To write the state to file
     movie->open("../molecular-dynamics-fys3150/movie.xyz");
 
-    for(int timestep=0; timestep<1000; timestep++) {
+    for(int timestep=0; timestep<100; timestep++) {
         system.step(dt);
         statisticsSampler->sample(&system);
- //       system.applyPeriodicBoundaryConditions();
         movie->saveState(&system);
     }
 

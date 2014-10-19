@@ -31,7 +31,7 @@ void System::applyPeriodicBoundaryConditions() {
     double zLength =  m_systemSize.z;
 
 
-    for(int i = 0; i < m_atoms.size(); i++)
+    for(int i = 0; i < fabs(m_atoms.size()); i++)
     {
         //Takes all the for atoms and shifts them to the other side if
         //if they overstep the boundary
@@ -64,15 +64,16 @@ void System::removeMomentum() {
     // unnessary
 
     vec3 momentum = vec3();
+    int noOfAtoms = m_atoms.size();
 
-    for(int i = 0; i < m_atoms.size(); i ++)
+    for(int i = 0; i < noOfAtoms; i ++)
         momentum = momentum + m_atoms[i]->velocity;
 
-    for(int i = 0; i < m_atoms.size(); i ++)
+    for(int i = 0; i < noOfAtoms; i ++)
     {
-        m_atoms[i]->velocity.x = m_atoms[i]->velocity.x - (momentum.x / m_atoms.size());
-        m_atoms[i]->velocity.y = m_atoms[i]->velocity.y - (momentum.y / m_atoms.size());
-        m_atoms[i]->velocity.z = m_atoms[i]->velocity.z - (momentum.z / m_atoms.size());
+        m_atoms[i]->velocity.x = m_atoms[i]->velocity.x - (momentum.x / noOfAtoms);
+        m_atoms[i]->velocity.y = m_atoms[i]->velocity.y - (momentum.y / noOfAtoms);
+        m_atoms[i]->velocity.z = m_atoms[i]->velocity.z - (momentum.z / noOfAtoms);
     }
 
 }
@@ -112,8 +113,6 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
                 //Four atoms need to be put in each lattice cell, they have the position:R_ij = R_i + r_j;
                 //where R_ij are their position, R_i is the lattice position and r_j is the position in the lattice
 
-
-
                 m_atoms[latticeNumber]->position = vec3(i,j,k)*latticeConstant + r_1;
                 m_atoms[latticeNumber + 1]->position = vec3(i,j,k)*latticeConstant + r_2;
                 m_atoms[latticeNumber + 2]->position = vec3(i,j,k)*latticeConstant + r_3;
@@ -121,17 +120,9 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
 
                 latticeNumber += 4;
 
-                cout << latticeNumber << endl;
-
             }
         }
     }
-
-    cout << m_atoms.size() << endl;
-
-    for(int k = 0 ;k < m_atoms.size();k++)
-        cout << m_atoms[k]->position << endl;
-
 
 }
 

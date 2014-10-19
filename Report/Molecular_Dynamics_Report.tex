@@ -1,5 +1,5 @@
 
-\documentclass[11pt,a4wide]{article}
+\documentclass[11pt]{article}
 \usepackage{verbatim}
 \usepackage{listings}
 \usepackage{graphicx}
@@ -13,6 +13,7 @@
 \usepackage{shadow}
 \usepackage{hyperref}
 \usepackage{physics}
+\usepackage{url}
 
 \setcounter{tocdepth}{2}
 
@@ -39,9 +40,135 @@
 \tableofcontents
 
 \newpage
+Notes
+\begin{itemize}
+\item Is it not the Leapfrog algorithm?
+\item Need to invent some unit test to implement, ask for ideas
+\item Dipoles? Should form crystals
+\item Magnetic force
+\item Different molecules
+\item Crystals mixed with liquids
+\end{itemize}
 
 \section{Theory}
 	\subsection{Verlet integrator}
+		The Integrator is a widely used integrator in  molecular dynamics \cite{compPhys} because of it's properties as a symplectic integrator which means that it conserves areas in phase space very well and it allows stable integration of the equation of motion \cite{aBInitio}. Newton's second law for for a particle in our molecule ensemble reads:
+
+		\[m\pdv[2]{x_{i}}{t} = F_{i}\]
+
+		\[\pdv{x_{i}}{t} = v_{i} \text{     and     } \pdv{v_{i}}{t} = \frac{F_{i}}{m} \]
+
+		The Leapfrog algorithm is a slight continuation on the Verlet algorithm doing the step in two steps. Doing a Taylor expansion around both the step and half the step we get.
+	
+
+		\begin{align}
+			x_{i}(t+h) &= x_i(t) + hx_i'(t) + \frac{h^2}{2}x_i''(t) + \order{h^3} \label{eq:leapfrog_start}
+			\\
+			x_i'(t+ \frac{h}{2} ) &= x_i'(t) + \frac{h}{2} x_i''(t) + \order{h^2} \label{eq:leapfrog_half}
+		\end{align}	
+
+		\noindent Inserting equation \eqref{eq:leapfrog_half} into \eqref{eq:leapfrog_start} to obtain
+
+		\begin{equation}
+		x_{i}(t+h) = x_i(t) + hx_i'(t+ \frac{h}{2})+ \order{h^3} \label{eq:leapfrog_pos_step}
+		\end{equation}
+
+		\noindent A Taylor first order expansion of the velocity produces the following
+
+		\begin{align}
+			x'_i(t+\frac{h}{2}) &= x_i'(t)  + \frac{h}{2}x_i''(t) + \order{h^2} \label{eq:leapfrog_vel_step}
+		\end{align}
+
+		\noindent By using equation \eqref{eq:leapfrog_vel_step}, then \eqref{eq:leapfrog_pos_step} and then \eqref{eq:leapfrog_vel_step} again we obtain \(x_i(t+h)\) and \(v_i(t+h)\). The algorithm follows:
+
+		\begin{align*}
+		v_i(t+\frac{h}{2}) &= x_i'(t)  + \frac{h}{2}\frac{F_i(t)}{m} + \order{h^2} 
+		\\
+		x_i(t+h) &= x_i(t) + hx_i'(t+ \frac{h} {2} ) + \order{h ^ 3}
+		\\
+		v_i(t+h) &= v_i(t+\frac{h}{2})  +  \frac{h}{2}\frac{F_i(t+ \frac{h}{2})}{m} + \order{h^2} 
+		\end{align*}
+
+
+	\subsection{Lennard-Jones Potential and force between two molecules}
+		We will be using the Lennard-Jones potential to approximate the forces between the molecules, which work quite well, given it's simplicity, for neutral particles, especially noble gases, as we are dealing with in this study \cite{Wiki}. The formula is given below.
+
+		\[
+		U(r_{ij}) = 4 \epsilon \left[ \left( \frac{\sigma}{r_{ij}} \right)^{12} - \left( \frac{\sigma}{r_{ij}} \right)^{6} \right]
+		\]
 		
+		At short distances the term to the twelfth power dominates and represents a repulsive force, Paulie exclusion principle, while at longer distances the term to sixth power dominates and represents an attractive force, van der Waal. The \(\sigma \) is the distance at which the potential is \(0\), while \( \epsilon  \) is the depth of the well. \\
+		Experimentally the following values for argon has been found: 
+		\(
+		\begin{cases}
+		\epsilon/k_B &= 119.8 \text{K} 
+		\\
+		\sigma &= 3.405 \text{\AA}
+		\end{cases}
+		\)
+
+		\{ Note to self, remember that twelve is the square of six.\}
+
+		\noindent The force felt between the molecules is given by the negative gradient of the potential.
+
+		\begin{align*} 
+		\vb{F}(r_{ij}) &= -\grad U(r_{ij})
+		\intertext{The potential only has a nonzero derivative along \( \vb{r}_{ij} \), the  axis between then particles, so it is natural to evaluate the gradient in that coordinate system before projecting it onto the xyz coordinates used by the program.}
+		\\
+		\vb{F} (r_{ij}) &= - 4 \epsilon \vu{r}_{ij} \partial_{r_{ij}}  \left[ \left( \frac{\sigma}{r_{ij}} \right)^{12} - \left( \frac{\sigma}{r_{ij}} \right)^{6} \right]
+		\\
+		\vb{F} (r_{ij}) &=- 4 \epsilon \vu{r}_{ij} \left[ \left( -\frac{12}{\sigma} \right) \left( \frac{\sigma}{r_{ij}}  \right)^{13} 
+		- \left( - \frac{6}{\sigma}  \right)\left( \frac{\sigma}{r_{ij}} \right)^{7} \right]
+		\intertext{Then it is projected onto the xyz coordinates, 
+		\( F_k = \left(F\frac{r_{ij}}{\abs{r_{ij}}}\right)_k= F\frac{k_{ij}}{\abs{r_{ij}}} \), where \( k_{ij} \) is the distance between the particles in direction \(k = \{x,y,z\}\) , and \( \abs{r_{ij}} \) is the total distance.
+		}
+		F_k &=  \frac{24}{\sigma} \epsilon \left[ 2  \left( \frac{\sigma}{r_{ij}}  \right)^{13} 
+		- \left( \frac{\sigma}{r_{ij}} \right)^{7} \right]\frac{k_{ij}}{\abs{r_{ij}}}
+		\end{align*}
+
+	\subsection{Algorithm to implement force}
+		The implementation of the force will be along the following steps:
+		\begin{itemize}
+		\item Calculate \(r_{ij} = \abs{\vb{r}_i - \vb{r}_j}\) for a particle pair
+		\item Calculate \(F_{r_{ij}} =  \frac{24}{\sigma} \epsilon \left[ 2  \left( \frac{\sigma}{r_{ij}}  \right)^{13} 
+		- \left( \frac{\sigma}{r_{ij}} \right)^{7} \right]\)
+		\item Calculate \(F_x = F_{r_{ij}} \frac{k_{ij}}{\abs{r_{ij}}} \) for xyz
+		\item Add the force to both particles force account, halves the necessary computations. One positive one negative
+		\end{itemize}
+
+
+
+
+\newpage
+\section{Useless shit}
+		\begin{equation*}
+		x_{i}(t+h) + x_{i}(t-h) = 2x_i(t) + h^2 x_i''(t) + \order{h^4} 
+		\end{equation*}
+
+		\begin{equation}
+		x_{i}(t+h) = 2x_i(t) -x_{i}(t-h) + h^2 F_{i}(t) + \order{h^4} 
+		\end{equation}
+
+		\noindent Since we now also need the velocity at the different timesteps we will use a first order Taylor expansion to find that. To achieve the same truncation error as in the position the timestep will be halved.
+
+		\begin{align*}
+			x_{i}(t+\frac{h}{2}) &= x_i(t) + \frac{h}{2}x_i'(t) + \order{\frac{h}{2}^2}
+			\\
+			x_{i}(t-\frac{h}{2}) &= x_i(t) - \frac{h}{2}x_i'(t) + \order{\frac{h}{2}^2}
+		\end{align*}
+		We will solve this for the velocity \( v_i = x_i'(t) \) by subtracting them.
+
+		\[
+		x_i'(t)  = \frac{x_{i}(t+h) - x_{i}(t-h)}{2h} + \order{h^2}
+		\]
+
+
+
+	
+
+
+
+\bibliography{mybib}{}
+\bibliographystyle{plain}
 		
 \end{document}
