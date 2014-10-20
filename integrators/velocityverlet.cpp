@@ -37,11 +37,14 @@ void VelocityVerlet::halfKick(System *system, double dt)
 void VelocityVerlet::move(System *system, double dt)
 {
  //   cout << "Move got called" << endl;
+
+//    cout << "Before move: " << system->atoms()[0]->position << endl;
     for(int i = 0; i < system->atoms().size(); i++)
     {
         Atom *atom = system->atoms()[i];
-        atom->position.addAndMultiply(atom->position, dt ); // r(t+ dt)= r(t) + v(t+dt/2)*dt
+        atom->position.addAndMultiply( atom->velocity, dt) ; // r(t+ dt)= r(t) + v(t+dt/2)*dt
     }
+//    cout << "After move: " << system->atoms()[0]->position << endl;
 
 }
 

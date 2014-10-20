@@ -25,14 +25,14 @@ int main()
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
 
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);
-    int gridLength = 1;
+    int gridNodes = 1;
 
 
     System system;
-    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(gridLength * latticeConstant,
-                                                                 gridLength * latticeConstant,
-                                                                 gridLength * latticeConstant)));
-    system.createFCCLattice(gridLength, latticeConstant);
+    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(   gridNodes * latticeConstant,
+                                                                    gridNodes * latticeConstant,
+                                                                    gridNodes * latticeConstant)));
+    system.createFCCLattice(gridNodes, latticeConstant);
     system.setPotential(new LennardJones(UnitConverter::temperatureFromSI(119.8),
                                          UnitConverter::lengthFromAngstroms(3.405)
                                             )); // Se report for values
@@ -52,25 +52,33 @@ int main()
 //        system.atoms().push_back(atom); // Add it to the list of atoms
 //    }
 
+    for(int i = 0 ; i < system.atoms().size(); i++)
+        cout << system.atoms()[i]-> position << endl;
 
+    cout << "Calculating force " << endl;
 
+    system.calculateForces();
+
+    return 0;
+
+    cout << "did it work?" << endl;
 
     StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
 
     IO *movie = new IO(); // To write the state to file
     movie->open("../molecular-dynamics-fys3150/movie.xyz");
 
-    for(int timestep=0; timestep<100; timestep++) {
+    for(int timestep=0; timestep<1; timestep++) {
         system.step(dt);
         statisticsSampler->sample(&system);
         movie->saveState(&system);
+//        cout << system.atoms()[0]->position << endl;
+
     }
 
     movie->close();
 
-    for(int i = 0; i < system.atoms().size(); i++)
-        cout << system.atoms()[i]->force << endl;
-
+//    cout << " End of timestep " << endl;
 
 
 
