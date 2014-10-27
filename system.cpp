@@ -31,24 +31,24 @@ void System::applyPeriodicBoundaryConditions() {
     double zLength =  m_systemSize.z;
 
 
-    for(int i = 0; i < fabs(m_atoms.size()); i++)
+    for(int i = 0; i < m_atoms.size(); i++)
     {
         //Takes all the for atoms and shifts them to the other side if
         //if they overstep the boundary
 
-        if(m_atoms[i]->position.x > xLength)
+        if(m_atoms[i]->position.x >= xLength)
             m_atoms[i]->position.x -= xLength;
 
         if(m_atoms[i]->position.x < 0)
             m_atoms[i]->position.x += xLength;
 
-        if(m_atoms[i]->position.y > yLength)
+        if(m_atoms[i]->position.y >= yLength)
             m_atoms[i]->position.y -= yLength;
 
         if(m_atoms[i]->position.y < 0)
             m_atoms[i]->position.y += yLength;
 
-        if(m_atoms[i]->position.z > zLength)
+        if(m_atoms[i]->position.z >= zLength)
             m_atoms[i]->position.z -= zLength;
 
         if(m_atoms[i]->position.z < 0)
@@ -80,6 +80,9 @@ void System::removeMomentum() {
 
 void System::resetForcesOnAllAtoms() {
 
+    for(int i = 0; i < m_atoms.size(); i++)
+        m_atoms[i]->force.setToZero();
+
 }
 
 void System::createFCCLattice(int numberOfUnitCellsEachDimension, double latticeConstant) {
@@ -87,14 +90,24 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
     // This function creates Nx*Ny*Nz cells and places four atoms, for each cell in a crystalline lattice
     // in those cells
 
+    //Setting the systemsize
+    this->setSystemSize(vec3(numberOfUnitCellsEachDimension *latticeConstant ,
+                             numberOfUnitCellsEachDimension *latticeConstant ,
+                             numberOfUnitCellsEachDimension *latticeConstant ));
+
+
+
     //Initialize the atoms and store pointers to them in the system->atoms list.
     //We need four atoms for each cell
     for(int i = 0; i < 4*pow(numberOfUnitCellsEachDimension, 3); i++)
     {
         Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-        atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(300));
+        atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(100));
         atoms().push_back(atom);
     }
+
+    cout << "The density of the system is " << (this->atoms().size()* UnitConverter::massFromSI(6.63352088e-26) )
+            / this->systemSize().lengthSquared() << " in atomic units "<< endl;
 
     int latticeNumber = 0;
 
@@ -113,7 +126,7 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
                 //Four atoms need to be put in each lattice cell, they have the position:R_ij = R_i + r_j;
                 //where R_ij are their position, R_i is the lattice position and r_j is the position in the lattice
 
-                m_atoms[latticeNumber]->position = vec3(i,j,k)*latticeConstant + r_1;
+                m_atoms[latticeNumber    ]->position = vec3(i,j,k)*latticeConstant + r_1;
                 m_atoms[latticeNumber + 1]->position = vec3(i,j,k)*latticeConstant + r_2;
                 m_atoms[latticeNumber + 2]->position = vec3(i,j,k)*latticeConstant + r_3;
                 m_atoms[latticeNumber + 3]->position = vec3(i,j,k)*latticeConstant + r_4;
@@ -128,6 +141,7 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
 
 void System::calculateForces() {
     resetForcesOnAllAtoms();
+    m_potential->setPotentialEnergy(0);
     m_potential->calculateForces(this);
 }
 

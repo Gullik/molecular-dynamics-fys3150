@@ -23,25 +23,57 @@ int main()
     cout << "One unit of mass is " << UnitConverter::massToSI(1.0) << " kg" << endl;
     cout << "One unit of temperature is " << UnitConverter::temperatureToSI(1.0) << " K" << endl;
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
+    cout << "One unit of energy is " << UnitConverter::energyToSI(1.0) << " J" << endl;
 
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);
-    int gridNodes = 1;
+    double sigma = UnitConverter::lengthFromAngstroms(3.405);
+    double epsilon = UnitConverter::energyFromSI(119.8*UnitConverter::kb);
+    int gridNodes = 5;
 
 
     System system;
-    system.setSystemSize(UnitConverter::lengthFromAngstroms(vec3(   gridNodes * latticeConstant,
-                                                                    gridNodes * latticeConstant,
-                                                                    gridNodes * latticeConstant)));
     system.createFCCLattice(gridNodes, latticeConstant);
-    system.setPotential(new LennardJones(UnitConverter::temperatureFromSI(119.8),
-                                         UnitConverter::lengthFromAngstroms(3.405)
-                                            )); // Se report for values
-//    system.setIntegrator(new EulerCromer());
+    system.setPotential(new LennardJones(sigma, epsilon));
     system.setIntegrator(new VelocityVerlet());
+
     system.removeMomentum();
 
 
 
+    StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
+
+    IO *movie = new IO(); // To write the state to file
+    movie->open("../molecular-dynamics-fys3150/movie.xyz");
+
+    movie->saveState(&system); //The initial state should also be recorded
+
+    for(int timestep=0; timestep<1000; timestep++) {
+        system.step(dt);
+        statisticsSampler->sample(&system);
+        movie->saveState(&system);
+
+    }
+
+    movie->close();
+
+
+    return 0;
+}
+
+//        test = 0;
+
+//        for(int i = 0 ; i < system.atoms().size(); i++)
+
+//            if( system.atoms()[i]->position.x < system.systemSize().x   &&
+//                system.atoms()[i]->position.y < system.systemSize().y   &&
+//                system.atoms()[i]->position.z < system.systemSize().z   &&
+//                system.atoms()[i]->position.x >= 0                      &&
+//                system.atoms()[i]->position.y >= 0                      &&
+//                system.atoms()[i]->position.z >= 0
+//                    )
+//                test += 1;
+
+//        cout << test << endl;
 
 
 //    for(int n=0; n<100; n++) {
@@ -52,35 +84,29 @@ int main()
 //        system.atoms().push_back(atom); // Add it to the list of atoms
 //    }
 
-    for(int i = 0 ; i < system.atoms().size(); i++)
-        cout << system.atoms()[i]-> position << endl;
-
-    cout << "Calculating force " << endl;
-
-    system.calculateForces();
-
-    return 0;
-
-    cout << "did it work?" << endl;
-
-    StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
-
-    IO *movie = new IO(); // To write the state to file
-    movie->open("../molecular-dynamics-fys3150/movie.xyz");
-
-    for(int timestep=0; timestep<1; timestep++) {
-        system.step(dt);
-        statisticsSampler->sample(&system);
-        movie->saveState(&system);
-//        cout << system.atoms()[0]->position << endl;
-
-    }
-
-    movie->close();
-
-//    cout << " End of timestep " << endl;
 
 
+//    cout << "Calculating force " << endl;
 
-    return 0;
-}
+//    system.calculateForces();
+
+//    return 0;
+
+//    double test = 0;
+
+//    for(int i = 0 ; i < system.atoms().size(); i++)
+
+//        if( system.atoms()[i]->position.x < system.systemSize().x   &&
+//            system.atoms()[i]->position.y < system.systemSize().y   &&
+//            system.atoms()[i]->position.z < system.systemSize().z   &&
+//            system.atoms()[i]->position.x >= 0                      &&
+//            system.atoms()[i]->position.y >= 0                      &&
+//            system.atoms()[i]->position.z >= 0
+//                )
+//            test += 1;
+
+//    cout << test << endl;
+
+//    vec3 size = system.systemSize();
+
+//    cout << size << endl;

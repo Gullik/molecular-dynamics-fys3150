@@ -39,4 +39,8 @@ public:
     void setIntegrator(Integrator *integrator) { m_integrator = integrator; }
     int steps() { return m_steps; }
     void setSteps(int steps) { m_steps = steps; }
+
+    // Statistical data about the system
+//    double m_potentialEnergy;
+
 };

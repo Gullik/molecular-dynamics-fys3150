@@ -49,6 +49,7 @@ Notes
 \item Magnetic force
 \item Different molecules
 \item Crystals mixed with liquids
+\item Unit Test, check that it stays stable if temp is zero, then forces should be zero for crystal configuration.
 \end{itemize}
 
 \section{Theory}
@@ -138,30 +139,18 @@ Notes
 		\end{itemize}
 
 
+	\subsection{Calculating statistical properties}
+		\subsubsection{Kinetic energy}
 
-
-\newpage
-\section{Useless shit}
-		\begin{equation*}
-		x_{i}(t+h) + x_{i}(t-h) = 2x_i(t) + h^2 x_i''(t) + \order{h^4} 
-		\end{equation*}
-
-		\begin{equation}
-		x_{i}(t+h) = 2x_i(t) -x_{i}(t-h) + h^2 F_{i}(t) + \order{h^4} 
-		\end{equation}
-
-		\noindent Since we now also need the velocity at the different timesteps we will use a first order Taylor expansion to find that. To achieve the same truncation error as in the position the timestep will be halved.
-
-		\begin{align*}
-			x_{i}(t+\frac{h}{2}) &= x_i(t) + \frac{h}{2}x_i'(t) + \order{\frac{h}{2}^2}
-			\\
-			x_{i}(t-\frac{h}{2}) &= x_i(t) - \frac{h}{2}x_i'(t) + \order{\frac{h}{2}^2}
-		\end{align*}
-		We will solve this for the velocity \( v_i = x_i'(t) \) by subtracting them.
+		The kinetic energy is found trough adding up the kinetic energy for all the atoms seperately.
 
 		\[
-		x_i'(t)  = \frac{x_{i}(t+h) - x_{i}(t-h)}{2h} + \order{h^2}
+		E_k = \sum\limits^{N_{atoms}}_{i=1}{\frac{1}{2}m_i v_i^2}
 		\]
+
+
+
+
 
 
 

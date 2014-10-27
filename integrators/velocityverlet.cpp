@@ -5,7 +5,7 @@
 using namespace std;
 
 VelocityVerlet::VelocityVerlet() :
-    m_firstStep(false) // This will set the variable m_firstStep to false when the object is created
+    m_firstStep(true) // This will set the variable m_firstStep to false when the object is created
 {
 
 }
@@ -18,6 +18,8 @@ VelocityVerlet::~VelocityVerlet()
 void VelocityVerlet::firstKick(System *system, double dt)
 {
     cout << "Firstkick got called" << endl;
+
+    system->calculateForces();
 
 }
 
@@ -50,21 +52,21 @@ void VelocityVerlet::move(System *system, double dt)
 
 void VelocityVerlet::integrate(System *system, double dt)
 {
-    system->calculateForces();
 
     if(m_firstStep) {           // Do not know the purpose of first kick thought?
-        firstKick(system, dt);
+//        firstKick(system, dt);
+        system->calculateForces();
         m_firstStep = false;
     }
-    halfKick(system, dt);   //This implements the first step, v(t + dt/2)= v(t) + F(t)/m*dt/2
+    halfKick(system, dt);                       //This implements the first step, v(t + dt/2)= v(t) + F(t)/m*dt/2
 
-    move(system, dt);       //System is moved, r(t+ dt)= r(t) + v(t+dt/2)*dt
+    move(system, dt);                           //System is moved, r(t+ dt)= r(t) + v(t+dt/2)*dt
 
     system->applyPeriodicBoundaryConditions();  //Put's them inside the boundary again
 
-    system->calculateForces();      //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
+    system->calculateForces();                  //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
 
-    halfKick(system, dt);   //Kicks the second half of the step v(t+dt)=v(t+dt/2) + F(t+dt)/m*dt/2
+    halfKick(system, dt);                       //Kicks the second half of the step v(t+dt)=v(t+dt/2) + F(t+dt)/m*dt/2
 
 //    cout << system->atoms()[0]->force  << endl;
 }

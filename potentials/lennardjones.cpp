@@ -1,5 +1,6 @@
 #include <potentials/lennardjones.h>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ LennardJones::LennardJones(double sigma, double epsilon) :
 
 void LennardJones::calculateForces(System *system)
 {
-    cout << "Got into potential" << endl;
+//    cout << "Got into potential" << endl;
     //This should calculate the force between to particles according to the gradient
     //of the L-J potential U = -4 E ((o/r)^12-(o/r)^6).
     //
@@ -30,7 +31,11 @@ void LennardJones::calculateForces(System *system)
 
     double lengthBetween = 0;
     vec3 vecBetween = vec3();
-    double force = 0;
+    vec3 force = vec3();
+    double forceMagnitude = 0;
+    double forceConstant = 24*m_epsilon/m_sigma;
+    double helpTerm = 0;
+    
 
     for(int i = 0; i < noOfAtoms; i++)
     {
@@ -47,7 +52,6 @@ void LennardJones::calculateForces(System *system)
             //  |                   |
             //  |                   |
 
-            cout << atoms[i]->position << " - " << atoms[j]->position << endl;
             vecBetween = atoms[i]->position - atoms[j]->position;   //The r_ij vector
 
             if(vecBetween.x > Lx/2)
@@ -67,13 +71,27 @@ void LennardJones::calculateForces(System *system)
 
             lengthBetween = vecBetween.length(); //The length of the distance between the particles, vecBetween is used to give direction to the force.
 
-            //Calculating the magnitude of the force
-            force =1 ; //To be done
 
 
-            cout << m_sigma << endl;
+            //Calculating the force felt from each atom and adding them to the force each atom feels
+
+            forceMagnitude = forceConstant * (2*pow(m_sigma/lengthBetween,13) - pow(m_sigma/lengthBetween,7)) ;
+
+            force = vecBetween/lengthBetween * forceMagnitude; //Normalizing the vector to correspond to k_ij / |r_ij|
+
+
+            atoms[i]->force.add(force);
+            atoms[j]->force.addAndMultiply(force, -1);
+
+            //Calculating the potential energy given by L-J 12-6 since we anyway are in the loop and has distances calculated
+            // U = 4*epsilon[ (sigma/r)^12 - (sigma/r)^6 ]
+
+            helpTerm = pow(m_sigma/lengthBetween, 6);
+
+            m_potentialEnergy += 4*m_epsilon*(helpTerm*helpTerm - helpTerm) ; //The potential Energy should be counted only once for each molecule pair?
+
         }
     }
 
-    m_potentialEnergy = 0; // Remember to compute this in the loop
+
 }
