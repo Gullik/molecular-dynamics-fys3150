@@ -1,5 +1,9 @@
 \begin{thebibliography}{1}
 
+\bibitem{myGit}
+Gulliks fys3150 github page \newline \url{
+  https://github.com/Gullik/molecular-dynamics-fys3150 }.
+
 \bibitem{Wiki}
 Wikipedia \url{http://en.wikipedia.org/wiki/Lennard-Jones_potential}.
 

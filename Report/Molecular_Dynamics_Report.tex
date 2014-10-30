@@ -52,8 +52,95 @@ Notes
 \item Unit Test, check that it stays stable if temp is zero, then forces should be zero for crystal configuration.
 \end{itemize}
 
+\section{Task a: Periodic boundary conditions}
+	This task was implemented in the function applyPeriodicBoundaryConditions() and the program can be found at the github page \cite{myGit}.
+\\ \\
+	\noindent Since we have limited computational power we are only working on a small piece of argon material, to get away from boundary cases we simulate a system of infinite size by implementing periodic boundary conditions. This is done by confining the atoms in a box and each time a particle reaches the end of the box it is put to the other side.
+
+\section{Task b: Removing momentum}
+	This task is implemented in the function removeMomentum().
+\\ \\
+	\noindent Since all the atoms are given random velocities the net momentum is not zero and the cloud will drift. This is solved by calculating the total momentum of all the atoms, and then subtracting a fraction of the total momentum from each atom so the total momentum ends up being zero.
+
+\section{Task c: Putting the atoms on a lattice}
+	This task is implemented in the function createFCCLattice()
+\\ \\
+	\noindent The noble gas argon should have a stable lattice structure when a solid, by letting the system start in a stable situation we avoid a lot of energy to be infused into the systems temperature due to it minimizing potential energy. The implementation is done by going through several nodes, \(R_i\), put on a grid in the box and then placing 4 atoms around each node. Let \(c_l\) be the length between nodes.
+
+	\begin{align*}
+	\vb{R}_{ij} = \vb{R}_i + \vb{r}_j \qquad{j }= \{1,2,3,4\} \qquad{i = }\{1,2, ... , 4\text{N}_{\text{atoms}}\}
+	\end{align*}
+
+	\begin{align*}
+		\vb{r}_1 &= 0 \vu{i} + 0 \vu{j} + 0 \vu{k}
+		\\
+		\vb{r}_2 &= \frac{c_l}{2} \vu{i} + \frac{c_l}{2} \vu{j} + 0 \vu{k}
+		\\
+		\vb{r}_3 &= 0 \vu{i} + \frac{c_l}{2} \vu{j} + \frac{c_l}{2} \vu{k}
+		\\
+		\vb{r}_4 &= \frac{c_l}{2} \vu{i} + 0 \vu{j} + \frac{c_l}{2} \vu{k}
+	\end{align*}
+
+
+\section{Task d: Implementing a Verlet integrator}
+	Se subsection \ref{sub:verlet}
+
+\section{Task e: Computing forces}
+	See subsection \ref{sub:potential}
+
+\section{Task f: Calculating some statistical properties}
+	\subsubsection{Kinetic energy}
+
+		The kinetic energy is found trough adding up the kinetic energy for all the atoms separately. It is straight forward and done in a function, in the statisticsSampler class, called sampleKineticEnergy(). It goes through all the atoms and adds it's contribution to the total kinetic energy. 
+
+		\[
+		E_k = \sum\limits^{N_{atoms}}_{i=1}{\frac{1}{2}m_i v_i^2}
+		\]
+
+		\noindent Then it also stores the instantaneous temperature of the substance which is given by the equipartition theorem \( \langle E_K \rangle = \frac{2}{3} k_B N_{atoms} T \). By looking at the kinetic energy in a time-instant instead of averaging it we get an instantaneous temperature.
+\\ \\
+		\noindent All of this is stored together with the potential energy to a text file "./statisticalResults/statisticalValues.tsv" which can be plotted by the python program plots.py.
+
+\section{Task g: implementing Neighbor cells}
+	\begin{table}
+		\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
+		\hline
+			\(N_{atoms}\)	&	4 			&	32			&	108			&	256		&	500		&	864		& 1372		2048
+			\\ \hline
+			time (s)		&	0.003539	&	0.054251	&	0.274064	&	1.22426	&	3.96325	&	11.3712	& 28.3554	& 62.9434 
+			\\ \hline
+		\end{tabular}
+	\label{tab:time_spent}
+	\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly.}
+	\end{table}
+
+	Table \ref{tab:time_spent} shows the time spent computing with different amount of atoms in the system, as the system increases the time is increasing fast and we can see the need to implement neighbor cells. The time is increasing fast because the program has to calculate the forces between all the atoms and that is of the order \(\order{N^2}\). By only calculating the nearby atoms, which will be the ones affecting each other the most, the time taken will mostly increase linearly.
+\\ \\
+	\noindent The force is mostly ignorable outside a distance of \(3 \sigma \), see figure \ref{fig:force}.
+
+	\begin{itemize}
+		\item Divide box into smaller boxes with \(l >3\sigma\), and put the cell layer class between the system and atoms.
+				\[\text{system} \rightarrow\text{cellbox} \rightarrow \text{atoms}\]
+		\item For each box go through all the boxes neighboring boxes. Boxes should be stored in three lists as \((i,j,k)\) and the neighboring boxes to box \((i,j,k)\) are \( (i-1, j-1, k-1), (i-1,j-1,k) \) and going through all the combinations to \( (i+1,j+1,k+1) \)
+		\item Each atom needs an additional box assignment property
+		\item Calculate the forces for all the atoms belonging to the neighboring boxes
+	\end{itemize}
+
+	
+
+
+
+	\begin{figure}
+		\includegraphics[scale = 0.5]{forcePlot}
+		\label{fig:force}
+		\caption{A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \(\sigma\) of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.}
+	\end{figure}
+
+
+
 \section{Theory}
 	\subsection{Verlet integrator}
+		\label{sub:verlet}
 		The Integrator is a widely used integrator in  molecular dynamics \cite{compPhys} because of it's properties as a symplectic integrator which means that it conserves areas in phase space very well and it allows stable integration of the equation of motion \cite{aBInitio}. Newton's second law for for a particle in our molecule ensemble reads:
 
 		\[m\pdv[2]{x_{i}}{t} = F_{i}\]
@@ -93,13 +180,14 @@ Notes
 
 
 	\subsection{Lennard-Jones Potential and force between two molecules}
+		\label{sub:potential}
 		We will be using the Lennard-Jones potential to approximate the forces between the molecules, which work quite well, given it's simplicity, for neutral particles, especially noble gases, as we are dealing with in this study \cite{Wiki}. The formula is given below.
 
 		\[
 		U(r_{ij}) = 4 \epsilon \left[ \left( \frac{\sigma}{r_{ij}} \right)^{12} - \left( \frac{\sigma}{r_{ij}} \right)^{6} \right]
 		\]
 		
-		At short distances the term to the twelfth power dominates and represents a repulsive force, Paulie exclusion principle, while at longer distances the term to sixth power dominates and represents an attractive force, van der Waal. The \(\sigma \) is the distance at which the potential is \(0\), while \( \epsilon  \) is the depth of the well. \\
+		At short distances the term to the twelfth power dominates and represents a repulsive force, Paulie exclusion principle, while at longer distances the term to sixth power dominates and represents the attractive van der Waal force. The \(\sigma \) is the distance at which the potential is \(0\), while \( \epsilon  \) is the depth of the well. \\
 		Experimentally the following values for argon has been found: 
 		\(
 		\begin{cases}
@@ -109,7 +197,6 @@ Notes
 		\end{cases}
 		\)
 
-		\{ Note to self, remember that twelve is the square of six.\}
 
 		\noindent The force felt between the molecules is given by the negative gradient of the potential.
 
@@ -128,7 +215,7 @@ Notes
 		- \left( \frac{\sigma}{r_{ij}} \right)^{7} \right]\frac{k_{ij}}{\abs{r_{ij}}}
 		\end{align*}
 
-	\subsection{Algorithm to implement force}
+	\subsubsection{Algorithm to implement force}
 		The implementation of the force will be along the following steps:
 		\begin{itemize}
 		\item Calculate \(r_{ij} = \abs{\vb{r}_i - \vb{r}_j}\) for a particle pair
@@ -137,25 +224,32 @@ Notes
 		\item Calculate \(F_x = F_{r_{ij}} \frac{k_{ij}}{\abs{r_{ij}}} \) for xyz
 		\item Add the force to both particles force account, halves the necessary computations. One positive one negative
 		\end{itemize}
+		
+
+	\appendix
+	\section{Unit scheme}
+		The program uses a more natural set of units which let's Boltzmann's constant be 1.
+
+		\begin{align}
+			1 \text{ mass unit } &= 1 \text{ a.m.u } = 1.661\cross 10^{-27} \text{ kg}
+			\\
+			1 \text{ length unit } &= 1.0 Å = 1.0\cross 10^{-10} \text{ m}
+			\\
+			1 \text{ energy unit } &= 1.651 \cross 10^{-21} \text{ J}
+			\\
+			1 \text{ temperature unit } &= 119.735 \text{ K}
+		\end{align}
 
 
-	\subsection{Calculating statistical properties}
-		\subsubsection{Kinetic energy}
+	All the other units are then expressed in term of these units.
 
-		The kinetic energy is found trough adding up the kinetic energy for all the atoms seperately.
-
-		\[
-		E_k = \sum\limits^{N_{atoms}}_{i=1}{\frac{1}{2}m_i v_i^2}
-		\]
-
-
-
-
-
-
-
-	
-
+	Boltzmann constant translates between temperature and energy, in SI-units it is \( k_B = 1.381 \cross 10^{-23} \text{ J K}^{-1}\), which in the previously defined units becomes
+	\begin{align}
+	k_B &= 1.381 \cross 10^{-23}  \left(\text{ J K}^{-1}\right)  \left(\frac{\text{energy unit}}{1.651 \cross 10^{-21} \text{ J}}\right)
+	\left( \frac{119.735 \text{ K}}{\text{temperature unit}} \right)
+	\\
+	k_B &= 1 \; \frac{\text{energy unit}}{\text{temperature unit}}
+	\end{align}
 
 
 \bibliography{mybib}{}

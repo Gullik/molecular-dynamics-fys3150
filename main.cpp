@@ -10,6 +10,7 @@
 #include <atom.h>
 #include <io.h>
 #include <unitconverter.h>
+#include <time.h>
 
 using namespace std;
 
@@ -25,10 +26,10 @@ int main()
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
     cout << "One unit of energy is " << UnitConverter::energyToSI(1.0) << " J" << endl;
 
-    double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);
-    double sigma = UnitConverter::lengthFromAngstroms(3.405);
+    double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);  //Not really necessary since the programs units already uses Angrstoms, but
+    double sigma = UnitConverter::lengthFromAngstroms(3.405);           //safer to keep in case it changes base units
     double epsilon = UnitConverter::energyFromSI(119.8*UnitConverter::kb);
-    int gridNodes = 5;
+    int gridNodes = 1;
 
 
     System system;
@@ -40,21 +41,37 @@ int main()
 
 
 
+
+
     StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
+
+    clock_t start, end;     //To keep track of the time
+
+    start = clock();
 
     IO *movie = new IO(); // To write the state to file
     movie->open("../molecular-dynamics-fys3150/movie.xyz");
 
     movie->saveState(&system); //The initial state should also be recorded
+//    statisticsSampler->sample(&system);
 
-    for(int timestep=0; timestep<1000; timestep++) {
+
+
+    for(int timestep=0; timestep<1; timestep++) {
         system.step(dt);
-        statisticsSampler->sample(&system);
+        if( timestep % 10 == 0)
+            statisticsSampler->sample(&system); //Kinetic part still not working properly
         movie->saveState(&system);
 
     }
 
     movie->close();
+
+    end = clock();
+
+    double time = 1.0*(end - start)/CLOCKS_PER_SEC;
+
+   cout << "The program spent " << time << " s to calculate the steps, with " << system.atoms().size() << " atoms" <<  endl;
 
 
     return 0;

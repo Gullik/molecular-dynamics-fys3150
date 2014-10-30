@@ -1,11 +1,8 @@
 #include <system.h>
 #include <integrators/integrator.h>
 #include <potentials/potential.h>
-#include <iostream>
 #include <unitconverter.h>
 #include <math.h>
-
-using namespace std;
 
 System::System() :
     m_potential(0),
@@ -102,9 +99,10 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
     for(int i = 0; i < 4*pow(numberOfUnitCellsEachDimension, 3); i++)
     {
         Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-        atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(100));
+        atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(300));
         atoms().push_back(atom);
     }
+
 
     cout << "The density of the system is " << (this->atoms().size()* UnitConverter::massFromSI(6.63352088e-26) )
             / this->systemSize().lengthSquared() << " in atomic units "<< endl;

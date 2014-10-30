@@ -10,49 +10,55 @@ I was expecting a `,' or a `}'---line 10 of file mybib.bib
 I'm skipping whatever remains of this entry
 I was expecting a `,' or a `}'---line 21 of file mybib.bib
  :  
- :  howpublished={\url{http://www.test.org/doe/}}
+ :  howpublished={\url{http://en.wikipedia.org/wiki/Lennard-Jones_potential}}
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 26 of file mybib.bib
+ :  
+ :  howpublished={\url{ https://github.com/Gullik/molecular-dynamics-fys3150 }}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--to sort, need author or key in myGit
 Warning--to sort, need author or key in Wiki
-You've used 3 entries,
+You've used 4 entries,
             2118 wiz_defined-function locations,
-            509 strings with 4288 characters,
-and the built_in function-call counts, 594 in all, are:
-= -- 48
-> -- 21
+            512 strings with 4395 characters,
+and the built_in function-call counts, 742 in all, are:
+= -- 60
+> -- 22
 < -- 0
-+ -- 9
++ -- 10
 - -- 6
-* -- 22
-:= -- 92
-add.period$ -- 5
-call.type$ -- 3
-change.case$ -- 12
+* -- 27
+:= -- 106
+add.period$ -- 6
+call.type$ -- 4
+change.case$ -- 15
 chr.to.int$ -- 0
-cite$ -- 4
-duplicate$ -- 21
-empty$ -- 68
+cite$ -- 6
+duplicate$ -- 28
+empty$ -- 91
 format.name$ -- 6
-if$ -- 130
+if$ -- 167
 int.to.chr$ -- 0
-int.to.str$ -- 3
+int.to.str$ -- 4
 missing$ -- 0
-newline$ -- 14
+newline$ -- 17
 num.names$ -- 4
-pop$ -- 26
+pop$ -- 34
 preamble$ -- 1
-purify$ -- 9
+purify$ -- 11
 quote$ -- 0
-skip$ -- 29
+skip$ -- 39
 stack$ -- 0
-substring$ -- 15
-swap$ -- 3
+substring$ -- 20
+swap$ -- 4
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 12
-warning$ -- 1
+type$ -- 16
+warning$ -- 2
 while$ -- 4
-width$ -- 4
-write$ -- 22
-(There were 2 error messages)
+width$ -- 5
+write$ -- 27
+(There were 3 error messages)

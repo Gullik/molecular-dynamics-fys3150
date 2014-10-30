@@ -2,7 +2,9 @@
 #include <vector>
 #include <atom.h>
 #include <math/vec3.h>
+#include <iostream>
 
+using namespace std;
 class Potential; class Integrator;
 using std::vector;
 using CompPhys::vec3;
