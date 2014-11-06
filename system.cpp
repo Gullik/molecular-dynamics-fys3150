@@ -3,6 +3,7 @@
 #include <potentials/potential.h>
 #include <unitconverter.h>
 #include <math.h>
+#include <lists/neighborlist.h>
 
 System::System() :
     m_potential(0),
@@ -23,12 +24,12 @@ System::~System()
 void System::applyPeriodicBoundaryConditions() {
     // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
 
-    double xLength =  m_systemSize.x;     // Vectors that should shift the atom one systemsize to the side when it
-    double yLength =  m_systemSize.y;    // when it goes over it.
+    double xLength =  m_systemSize.x;       // Lengths that should shift the atom one systemsize to the side when it
+    double yLength =  m_systemSize.y;       // goes over it.
     double zLength =  m_systemSize.z;
 
 
-    for(int i = 0; i < m_atoms.size(); i++)
+    for(int i = 0; i < int(m_atoms.size()); i++)
     {
         //Takes all the for atoms and shifts them to the other side if
         //if they overstep the boundary
@@ -77,7 +78,7 @@ void System::removeMomentum() {
 
 void System::resetForcesOnAllAtoms() {
 
-    for(int i = 0; i < m_atoms.size(); i++)
+    for(int i = 0; i < int(m_atoms.size()); i++)
         m_atoms[i]->force.setToZero();
 
 }
@@ -139,12 +140,22 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
 
 void System::calculateForces() {
     resetForcesOnAllAtoms();
+
+
+
+    m_list->sortAtoms(this);
+
+
+
     m_potential->setPotentialEnergy(0);
     m_potential->calculateForces(this);
+
 }
 
 void System::step(double dt) {
+
     m_integrator->integrate(this, dt);
+
     m_steps++;
     m_currentTime += dt;
 }

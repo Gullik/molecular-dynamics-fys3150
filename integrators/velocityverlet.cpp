@@ -38,7 +38,7 @@ void VelocityVerlet::halfKick(System *system, double dt)
 
 void VelocityVerlet::move(System *system, double dt)
 {
- //   cout << "Move got called" << endl;
+
 
 //    cout << "Before move: " << system->atoms()[0]->position << endl;
     for(int i = 0; i < system->atoms().size(); i++)
@@ -53,8 +53,8 @@ void VelocityVerlet::move(System *system, double dt)
 void VelocityVerlet::integrate(System *system, double dt)
 {
 
-    if(m_firstStep) {           // Do not know the purpose of first kick thought?
-//        firstKick(system, dt);
+
+    if(m_firstStep) {
         system->calculateForces();
         m_firstStep = false;
     }
@@ -64,7 +64,10 @@ void VelocityVerlet::integrate(System *system, double dt)
 
     system->applyPeriodicBoundaryConditions();  //Put's them inside the boundary again
 
+
     system->calculateForces();                  //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
+
+
 
     halfKick(system, dt);                       //Kicks the second half of the step v(t+dt)=v(t+dt/2) + F(t+dt)/m*dt/2
 

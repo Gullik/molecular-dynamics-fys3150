@@ -4,6 +4,7 @@
 #include <potentials/lennardjones.h>
 #include <integrators/eulercromer.h>
 #include <integrators/velocityverlet.h>
+#include <lists/neighborlist.h>
 
 #include <system.h>
 #include <statisticssampler.h>
@@ -29,19 +30,17 @@ int main()
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);  //Not really necessary since the programs units already uses Angrstoms, but
     double sigma = UnitConverter::lengthFromAngstroms(3.405);           //safer to keep in case it changes base units
     double epsilon = UnitConverter::energyFromSI(119.8*UnitConverter::kb);
-    int gridNodes = 1;
+    int gridNodes = 5;      //After the neighborlists implementation it needs more that 2 gridnodes to run correctly
+    double neighborSize = 3*sigma;
 
 
     System system;
     system.createFCCLattice(gridNodes, latticeConstant);
     system.setPotential(new LennardJones(sigma, epsilon));
     system.setIntegrator(new VelocityVerlet());
+    system.setNeighborList(new NeighborList(neighborSize, system.systemSize()));
 
     system.removeMomentum();
-
-
-
-
 
     StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
 
@@ -49,7 +48,7 @@ int main()
 
     start = clock();
 
-    IO *movie = new IO(); // To write the state to file
+    IO *movie = new IO();   // To write the state to file
     movie->open("../molecular-dynamics-fys3150/movie.xyz");
 
     movie->saveState(&system); //The initial state should also be recorded
@@ -57,15 +56,17 @@ int main()
 
 
 
-    for(int timestep=0; timestep<1; timestep++) {
+    for(int timestep=0; timestep < 10000 ; timestep++) {
         system.step(dt);
+
         if( timestep % 10 == 0)
-            statisticsSampler->sample(&system); //Kinetic part still not working properly
+            statisticsSampler->sample(&system);
         movie->saveState(&system);
 
     }
 
     movie->close();
+
 
     end = clock();
 
@@ -73,24 +74,14 @@ int main()
 
    cout << "The program spent " << time << " s to calculate the steps, with " << system.atoms().size() << " atoms" <<  endl;
 
+//   for(int i = 0; i < system.atoms().size();i++)
+//   {
+//        cout << system.atoms()[i]->force << endl;
+//   }
 
     return 0;
 }
 
-//        test = 0;
-
-//        for(int i = 0 ; i < system.atoms().size(); i++)
-
-//            if( system.atoms()[i]->position.x < system.systemSize().x   &&
-//                system.atoms()[i]->position.y < system.systemSize().y   &&
-//                system.atoms()[i]->position.z < system.systemSize().z   &&
-//                system.atoms()[i]->position.x >= 0                      &&
-//                system.atoms()[i]->position.y >= 0                      &&
-//                system.atoms()[i]->position.z >= 0
-//                    )
-//                test += 1;
-
-//        cout << test << endl;
 
 
 //    for(int n=0; n<100; n++) {

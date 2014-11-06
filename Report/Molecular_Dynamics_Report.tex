@@ -105,13 +105,15 @@ Notes
 	\begin{table}
 		\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
 		\hline
-			\(N_{atoms}\)	&	4 			&	32			&	108			&	256		&	500		&	864		& 1372		2048
+			\(N_{atoms}\)	&	4 			&	32			&	108			&	256		&	500		&	864		& 1372		&	2048
 			\\ \hline
 			time (s)		&	0.003539	&	0.054251	&	0.274064	&	1.22426	&	3.96325	&	11.3712	& 28.3554	& 62.9434 
 			\\ \hline
+			time (s) with list & -			& 0.179424		&	1.74696		&	2.89621	&	9.14402	&	13.3765	& 33.5662	& 39.6798
+			\\ \hline
 		\end{tabular}
 	\label{tab:time_spent}
-	\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly.}
+	\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}
 	\end{table}
 
 	Table \ref{tab:time_spent} shows the time spent computing with different amount of atoms in the system, as the system increases the time is increasing fast and we can see the need to implement neighbor cells. The time is increasing fast because the program has to calculate the forces between all the atoms and that is of the order \(\order{N^2}\). By only calculating the nearby atoms, which will be the ones affecting each other the most, the time taken will mostly increase linearly.

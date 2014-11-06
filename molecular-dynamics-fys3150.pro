@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     statisticssampler.cpp \
     integrators/eulercromer.cpp \
     unitconverter.cpp \
-    lists/neighborlist.cpp
+    lists/neighborlist.cpp \
+    thermostat.cpp
 
 HEADERS += \
     atom.h \
@@ -33,5 +34,6 @@ HEADERS += \
     statisticssampler.h \
     integrators/eulercromer.h \
     unitconverter.h \
-    lists/neighborlist.h
+    lists/neighborlist.h \
+    thermostat.h
 

@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace std;
-class Potential; class Integrator;
+class Potential; class Integrator; class NeighborList;
 using std::vector;
 using CompPhys::vec3;
 
@@ -18,6 +18,7 @@ private:
     Integrator *m_integrator;
     double m_currentTime;
     int m_steps;
+    NeighborList *m_list;
 
 public:
     System();
@@ -28,6 +29,11 @@ public:
     void removeMomentum();
     void calculateForces();
     void step(double dt);
+
+    void setNeighborList(NeighborList *neighborlist) { m_list = neighborlist; }
+    NeighborList *list() {return m_list;}
+
+//    NeighborList *neighborList() {return m_neighborList;}
 
     // Setters and getters
     vector<Atom *> &atoms() { return m_atoms; }
@@ -42,7 +48,6 @@ public:
     int steps() { return m_steps; }
     void setSteps(int steps) { m_steps = steps; }
 
-    // Statistical data about the system
-//    double m_potentialEnergy;
+
 
 };
