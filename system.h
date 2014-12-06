@@ -3,9 +3,10 @@
 #include <atom.h>
 #include <math/vec3.h>
 #include <iostream>
+#include <thermostats/thermostat.h>
 
 using namespace std;
-class Potential; class Integrator; class NeighborList;
+class Potential; class Integrator; class NeighborList; class Thermostat;
 using std::vector;
 using CompPhys::vec3;
 
@@ -19,6 +20,7 @@ private:
     double m_currentTime;
     int m_steps;
     NeighborList *m_list;
+    Thermostat *m_thermostat;
 
 public:
     System();
@@ -30,8 +32,12 @@ public:
     void calculateForces();
     void step(double dt);
 
+
     void setNeighborList(NeighborList *neighborlist) { m_list = neighborlist; }
     NeighborList *list() {return m_list;}
+
+    void setThermostat(Thermostat *thermostat) {m_thermostat = thermostat; }
+    Thermostat *thermostat() {return m_thermostat; }
 
 //    NeighborList *neighborList() {return m_neighborList;}
 

@@ -35,7 +35,7 @@ void StatisticsSampler::sampleKineticEnergy(System *system)
     double kineticEnergy = 0;
     double temperature = 0;
 
-    for(int i = 0 ; i < system->atoms().size() ; i++)
+    for(int i = 0 ; i < int(system->atoms().size()) ; i++)
     {
         Atom *atom = system->atoms()[i];
 

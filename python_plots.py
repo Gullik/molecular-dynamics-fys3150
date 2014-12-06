@@ -12,15 +12,10 @@ potentialEnergy = statisticalValues[1: , 3]
 totalEnergy = kineticEnergy + potentialEnergy
 
 relativeVariation = np.abs(( np.max(totalEnergy) - np.min(totalEnergy) ) /np.average(totalEnergy))
-relativePotentialVariation = np.abs(( np.max(potentialEnergy) - np.min(potentialEnergy) ) /np.average(totalEnergy))
-relativeKineticVariation = np.abs(( np.max(kineticEnergy) - np.min(kineticEnergy) ) /np.average(totalEnergy))
 
-print "The following is the max deviation of the energies relative to the total average energy"
-print "Kinetic energy = ", relativeKineticVariation
-print "Potential energy = " , relativePotentialVariation
-print "Total energy = " , relativeVariation
-print "The total energy deviates compared to the single energies deviation is in the order " , \
-			 relativeVariation / np.max([relativeKineticVariation, relativePotentialVariation])
+
+print "The total energy has a relative maxvariation of = " , relativeVariation
+
 
 tempFigs = py.figure()
 py.plot(time, temperature)

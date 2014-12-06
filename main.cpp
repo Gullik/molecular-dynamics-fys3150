@@ -5,6 +5,7 @@
 #include <integrators/eulercromer.h>
 #include <integrators/velocityverlet.h>
 #include <lists/neighborlist.h>
+#include <thermostats/berendsen.h>
 
 #include <system.h>
 #include <statisticssampler.h>
@@ -30,17 +31,24 @@ int main()
     double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);  //Not really necessary since the programs units already uses Angrstoms, but
     double sigma = UnitConverter::lengthFromAngstroms(3.405);           //safer to keep in case it changes base units
     double epsilon = UnitConverter::energyFromSI(119.8*UnitConverter::kb);
-    int gridNodes = 5;      //After the neighborlists implementation it needs more that 2 gridnodes to run correctly
-    double neighborSize = 3*sigma;
+    int gridNodes = 6;      //After the neighborlists implementation it needs enough gridnodes to have 3+ neighors to work properly
+    double cutOffLength = 3*sigma;
 
 
     System system;
     system.createFCCLattice(gridNodes, latticeConstant);
     system.setPotential(new LennardJones(sigma, epsilon));
     system.setIntegrator(new VelocityVerlet());
-    system.setNeighborList(new NeighborList(neighborSize, system.systemSize()));
+    system.setNeighborList(new NeighborList(cutOffLength, system.systemSize()));
+    system.setThermostat(new Berendsen(UnitConverter::temperatureFromSI(200), 0.1));
 
     system.removeMomentum();
+
+    vec3 systemSize = system.systemSize();
+
+    cout << "The systemSize is: " << systemSize << endl;
+    cout << "The cutOffLength is: " << system.list()->cutOffLength() << endl;
+    cout << "No of neighbors in each direction is: " << system.list()->noOfNeighbors() << endl;
 
     StatisticsSampler *statisticsSampler = new StatisticsSampler(); //
 
@@ -56,17 +64,22 @@ int main()
 
 
 
-    for(int timestep=0; timestep < 10000 ; timestep++) {
+    for(int timestep=0; timestep < 1000 ; timestep++) {
         system.step(dt);
+
+        if(timestep == 300)
+            system.thermostat()->turn_off();
+
 
         if( timestep % 10 == 0)
             statisticsSampler->sample(&system);
         movie->saveState(&system);
 
+        if(timestep % 100 == 0)
+            cout << "At timestep: " << timestep << endl;
     }
 
     movie->close();
-
 
     end = clock();
 
@@ -74,47 +87,6 @@ int main()
 
    cout << "The program spent " << time << " s to calculate the steps, with " << system.atoms().size() << " atoms" <<  endl;
 
-//   for(int i = 0; i < system.atoms().size();i++)
-//   {
-//        cout << system.atoms()[i]->force << endl;
-//   }
-
     return 0;
 }
 
-
-
-//    for(int n=0; n<100; n++) {
-//        // Add one example atom. You'll have to create many such atoms in the createFCCLattice function above.
-//        Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26)); // Argon mass, see http://en.wikipedia.org/wiki/Argon
-////        atom->resetVelocityMaxwellian(UnitConverter::temperatureFromSI(300));
-////        atom->position.randomUniform(0, system.systemSize().x);
-//        system.atoms().push_back(atom); // Add it to the list of atoms
-//    }
-
-
-
-//    cout << "Calculating force " << endl;
-
-//    system.calculateForces();
-
-//    return 0;
-
-//    double test = 0;
-
-//    for(int i = 0 ; i < system.atoms().size(); i++)
-
-//        if( system.atoms()[i]->position.x < system.systemSize().x   &&
-//            system.atoms()[i]->position.y < system.systemSize().y   &&
-//            system.atoms()[i]->position.z < system.systemSize().z   &&
-//            system.atoms()[i]->position.x >= 0                      &&
-//            system.atoms()[i]->position.y >= 0                      &&
-//            system.atoms()[i]->position.z >= 0
-//                )
-//            test += 1;
-
-//    cout << test << endl;
-
-//    vec3 size = system.systemSize();
-
-//    cout << size << endl;

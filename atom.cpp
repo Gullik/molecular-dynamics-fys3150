@@ -5,7 +5,7 @@
 Atom::Atom(double mass) :
     m_mass(mass)
 {
-    
+    m_forceCounter = 0;
 }
 
 Atom::~Atom()

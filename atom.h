@@ -6,11 +6,15 @@ class Atom
 {
 private:
     double m_mass;
+
 public:
     vec3 position;
     vec3 velocity;
     vec3 force;
 
+    int m_forceCounter;
+
+    int forceCounter(){return m_forceCounter;}
     Atom(double mass);
     ~Atom();
     void resetForce();

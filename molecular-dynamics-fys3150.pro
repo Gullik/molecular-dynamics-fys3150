@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     integrators/eulercromer.cpp \
     unitconverter.cpp \
     lists/neighborlist.cpp \
-    thermostat.cpp
+    thermostats/thermostat.cpp \
+    thermostats/berendsen.cpp
 
 HEADERS += \
     atom.h \
@@ -35,5 +36,6 @@ HEADERS += \
     integrators/eulercromer.h \
     unitconverter.h \
     lists/neighborlist.h \
-    thermostat.h
+    thermostats/thermostat.h \
+    thermostats/berendsen.h
 

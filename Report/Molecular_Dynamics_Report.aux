@@ -27,10 +27,11 @@
 \@writefile{toc}{\contentsline {section}{\numberline {7}Task g: implementing Neighbor cells}{3}{section.7}}
 \citation{compPhys}
 \citation{aBInitio}
-\newlabel{tab:time_spent}{{7}{4}{Task g: implementing Neighbor cells}{section.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}}{4}{table.1}}
-\newlabel{fig:force}{{7}{4}{Task g: implementing Neighbor cells}{table.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \relax $\sigma \relax \GenericError  {               }{LaTeX Error: Bad math environment delimiter}{See the LaTeX manual or LaTeX Companion for explanation.}{Your command was ignored.\MessageBreak Type  I <command> <return>  to replace it with another command,\MessageBreak or  <return>  to continue without it.} of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.}}{4}{figure.1}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.\relax }}{4}{table.caption.2}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:time_spent}{{1}{4}{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.\relax }{table.caption.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \relax $\sigma \relax \GenericError  {               }{LaTeX Error: Bad math environment delimiter}{See the LaTeX manual or LaTeX Companion for explanation.}{Your command was ignored.\MessageBreak Type  I <command> <return>  to replace it with another command,\MessageBreak or  <return>  to continue without it.} of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.\relax }}{4}{figure.caption.3}}
+\newlabel{fig:force}{{1}{4}{A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \(\sigma \) of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.\relax }{figure.caption.3}{}}
 \citation{Wiki}
 \@writefile{toc}{\contentsline {section}{\numberline {8}Theory}{5}{section.8}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Verlet integrator}{5}{subsection.8.1}}
@@ -42,10 +43,19 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Lennard-Jones Potential and force between two molecules}{5}{subsection.8.2}}
 \newlabel{sub:potential}{{8.2}{5}{Lennard-Jones Potential and force between two molecules}{subsection.8.2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.1}Algorithm to implement force}{6}{subsubsection.8.2.1}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Unit scheme}{6}{appendix.A}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Cycling thourh the neighbors}{6}{subsection.8.3}}
 \bibdata{mybib}
 \bibcite{myGit}{1}
 \bibcite{Wiki}{2}
 \bibcite{compPhys}{3}
 \bibcite{aBInitio}{4}
 \bibstyle{plain}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Unit scheme}{7}{appendix.A}}
+\newlabel{fig:neighbor_grid}{{2a}{8}{All the neighbors in a \(3\cross 3\) system divided up into three slices with j constant. The numbers are position in an ijk-grid.\relax }{figure.caption.4}{}}
+\newlabel{sub@fig:neighbor_grid}{{a}{8}{All the neighbors in a \(3\cross 3\) system divided up into three slices with j constant. The numbers are position in an ijk-grid.\relax }{figure.caption.4}{}}
+\newlabel{fig:top}{{2b}{8}{Let the center cell interact with the top layer. 'X' represents a cell that the center cell, 'O' has interacted with. '*' represents a cell that will interact with the center cel, 'O' if it undergoes the same scheme as the center cell 'O'.\relax }{figure.caption.4}{}}
+\newlabel{sub@fig:top}{{b}{8}{Let the center cell interact with the top layer. 'X' represents a cell that the center cell, 'O' has interacted with. '*' represents a cell that will interact with the center cel, 'O' if it undergoes the same scheme as the center cell 'O'.\relax }{figure.caption.4}{}}
+\newlabel{fig:front}{{2c}{8}{Then we let the center cell interact with the rest of the front, i-direction.\relax }{figure.caption.4}{}}
+\newlabel{sub@fig:front}{{c}{8}{Then we let the center cell interact with the rest of the front, i-direction.\relax }{figure.caption.4}{}}
+\newlabel{fig:side}{{2d}{8}{Then we let the center cell interact with side, j-direction and all the neighboring cells to cell \(111\) is interacted with, or interacts with cell \(111\) when all the cells are run trough.\relax }{figure.caption.4}{}}
+\newlabel{sub@fig:side}{{d}{8}{Then we let the center cell interact with side, j-direction and all the neighboring cells to cell \(111\) is interacted with, or interacts with cell \(111\) when all the cells are run trough.\relax }{figure.caption.4}{}}

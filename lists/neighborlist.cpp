@@ -2,7 +2,7 @@
 #include "atom.h"
 #include <system.h>
 
-NeighborList::NeighborList(double neighborSize, vec3 systemSize)
+NeighborList::NeighborList(double cutOffLength, vec3 systemSize)
 {
     //This should only contain atoms? and it needs a function to add and delete atoms as they leave the box territory,
     //or enter it
@@ -10,7 +10,7 @@ NeighborList::NeighborList(double neighborSize, vec3 systemSize)
 
     //Setting up lists
 
-    int noOfNeighbors = int(systemSize.x/neighborSize) + 1  ;
+    int noOfNeighbors = int(systemSize.x/cutOffLength);
 
     vector<Atom*> atomList;
 
@@ -39,6 +39,8 @@ NeighborList::NeighborList(double neighborSize, vec3 systemSize)
 
     m_noOfNeighbors = noOfNeighbors;          //Storing it in the class for convenience
 
+    m_cutOffLength = cutOffLength;
+
 }
 
 void NeighborList::sortAtoms(System *system)
@@ -47,11 +49,12 @@ void NeighborList::sortAtoms(System *system)
 
     clear(system);      //Clears the nighborLists of atoms
 
-
-
     int i,j,k;
 
-    for(int n = 0 ; n < system->atoms().size() ; n++ )
+//    cout << "systemsize = " << system->systemSize().x << "; #Nabolag = " << m_noOfNeighbors << "; neighborLength = "
+//         << system->systemSize().x/m_noOfNeighbors << endl;
+
+    for(int n = 0 ; n < int(system->atoms().size()) ; n++ )
     {
         //Each atom needs to be placed in it's neighborhood
 
@@ -59,14 +62,16 @@ void NeighborList::sortAtoms(System *system)
         j = int (system->atoms()[n]->position.y / system->systemSize().y * m_noOfNeighbors );
         k = int (system->atoms()[n]->position.z / system->systemSize().z * m_noOfNeighbors );
 
-//        cout << "For atom " << n << endl;
-//        cout << "i = " << i << "; position = " << system->atoms()[n]->position.x <<
-//                "; systemsize = " << system->systemSize().x << "; #Nabolag = " << m_noOfNeighbors << endl;
+//        cout << "Atom " << n << endl;
+//        cout << "Har position " <<  system->atoms()[n]->position << " og er i box " << i << j << k << endl;
+
 
         m_neighborList[i][j][k].push_back(system->atoms()[n]);
 
 
     }
+
+
 
 
 
@@ -85,14 +90,6 @@ void NeighborList::clear(System *system)
         }
     }
 
-}
-
-void NeighborList::ghostCells(System *system)
-{
-    for(int i = 0; i < m_noOfNeighbors + 2; i++)
-    {
-        //not implemented yet
-    }
 }
 
 

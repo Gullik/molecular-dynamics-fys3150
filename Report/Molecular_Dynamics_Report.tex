@@ -14,6 +14,11 @@
 \usepackage{hyperref}
 \usepackage{physics}
 \usepackage{url}
+\usepackage{tikz}
+\usepackage{subcaption}
+
+
+\usetikzlibrary{arrows, shapes}
 
 \setcounter{tocdepth}{2}
 
@@ -112,8 +117,8 @@ Notes
 			time (s) with list & -			& 0.179424		&	1.74696		&	2.89621	&	9.14402	&	13.3765	& 33.5662	& 39.6798
 			\\ \hline
 		\end{tabular}
+		\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}
 	\label{tab:time_spent}
-	\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}
 	\end{table}
 
 	Table \ref{tab:time_spent} shows the time spent computing with different amount of atoms in the system, as the system increases the time is increasing fast and we can see the need to implement neighbor cells. The time is increasing fast because the program has to calculate the forces between all the atoms and that is of the order \(\order{N^2}\). By only calculating the nearby atoms, which will be the ones affecting each other the most, the time taken will mostly increase linearly.
@@ -134,8 +139,8 @@ Notes
 
 	\begin{figure}
 		\includegraphics[scale = 0.5]{forcePlot}
-		\label{fig:force}
 		\caption{A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \(\sigma\) of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.}
+		\label{fig:force}
 	\end{figure}
 
 
@@ -226,6 +231,146 @@ Notes
 		\item Calculate \(F_x = F_{r_{ij}} \frac{k_{ij}}{\abs{r_{ij}}} \) for xyz
 		\item Add the force to both particles force account, halves the necessary computations. One positive one negative
 		\end{itemize}
+
+	\subsection{Cycling thourh the neighbors}
+	A simple system of \(3\cross 3\) neighbors, see figure \ref{fig:neighbor_grid} will have all the properties and connections of a larger system, since a neighbor is only connected to the neighbors bordering it. Let us choose the neighbor in the center, \(111\),  and find the neighbors we must go through to find to let it interact with each of it's neighbors once. First we let it interact with the top layer, \ref{fig:top}, and then we note that it is not necessary to let it interact with the bottom layer, since all the cells in that layer will interact with the choosen cell, \(111\). Then we fill the remainer of the front, 
+
+	\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+	\begin{figure}
+		\begin{subfigure}{1\textwidth}
+			\begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(2,0)/200}, 	{(2,1)/201},	{(2,2)/202},
+	                            		{(1,0)/000}, 	{(1,1)/101}, 	{(1,2)/102},
+	                            		{(0,0)/000}, 	{(0,1)/001},	{(0,2)/002}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 0\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(2,0)/210}, 	{(2,1)/211},	{(2,2)/212},
+	                            		{(1,0)/010}, 	{(1,1)/111}, 	{(1,2)/112},
+	                            		{(0,0)/010}, 	{(0,1)/011},	{(0,2)/012}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 1\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(2,0)/220}, 	{(2,1)/221},	{(2,2)/222},
+	                            		{(1,0)/020}, 	{(1,1)/121}, 	{(1,2)/122},
+	                            		{(0,0)/020}, 	{(0,1)/021},	{(0,2)/022}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 2\)}
+	        \end{subfigure}
+	       	\caption{All the neighbors in a \(3\cross 3\) system divided up into three slices with j constant. The numbers are position in an ijk-grid.}
+	       	\label{fig:neighbor_grid}
+		\end{subfigure}
+		\begin{subfigure}{1\textwidth}
+			\begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/}, 	{(1,1)/}, 	{(2,1)/},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 0\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/}, 	{(1,1)/O}, 	{(2,1)/},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 1\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/}, 	{(1,1)/}, 	{(2,1)/},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 2\)}
+	        \end{subfigure}
+	       	\caption{Let the center cell interact with the top layer. 'X' represents a cell that the center cell, 'O' has interacted with. '*' represents a cell that will interact with the center cel, 'O' if it undergoes the same scheme as the center cell 'O'.}
+	       	\label{fig:top}
+		\end{subfigure}
+		\begin{subfigure}{1\textwidth}
+			\begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 0\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/O}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 1\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 2\)}
+	        \end{subfigure}
+	       	\caption{Then we let the center cell interact with the rest of the front, i-direction.}
+	       	\label{fig:front}
+		\end{subfigure}
+		\begin{subfigure}{1\textwidth}
+			\begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/X}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 0\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/O}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 1\)}
+	        \end{subfigure}
+	        \qquad \qquad
+	        \begin{subfigure}[b]{0.18\textwidth}
+			\begin{tikzpicture}[scale=1.0, auto,swap]
+	    		\foreach \pos/\name in {{(0,2)/X}, 	{(1,2)/X},	{(2,2)/X},
+	                            		{(0,1)/*}, 	{(1,1)/*}, 	{(2,1)/X},
+	                            		{(0,0)/*}, 	{(1,0)/*},	{(2,0)/*}}
+	        	\node[vertex] (\name) at \pos {$\name$};
+	        \end{tikzpicture}
+	        \caption*{j \(= 2\)}
+	        \end{subfigure}
+	       	\caption{Then we let the center cell interact with side, j-direction and all the neighboring cells to cell \(111\) is interacted with, or interacts with cell \(111\) when all the cells are run trough.}
+	       	\label{fig:side}
+		\end{subfigure}
+	\end{figure}
 		
 
 	\appendix
@@ -252,6 +397,9 @@ Notes
 	\\
 	k_B &= 1 \; \frac{\text{energy unit}}{\text{temperature unit}}
 	\end{align}
+
+
+
 
 
 \bibliography{mybib}{}

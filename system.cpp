@@ -141,20 +141,22 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
 void System::calculateForces() {
     resetForcesOnAllAtoms();
 
-
-
     m_list->sortAtoms(this);
-
-
 
     m_potential->setPotentialEnergy(0);
     m_potential->calculateForces(this);
 
+
 }
+
+
 
 void System::step(double dt) {
 
     m_integrator->integrate(this, dt);
+
+    if(m_thermostat->status())
+        m_thermostat->applyThermostat(this, dt);
 
     m_steps++;
     m_currentTime += dt;

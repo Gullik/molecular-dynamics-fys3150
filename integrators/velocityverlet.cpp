@@ -15,19 +15,12 @@ VelocityVerlet::~VelocityVerlet()
 
 }
 
-void VelocityVerlet::firstKick(System *system, double dt)
-{
-    cout << "Firstkick got called" << endl;
-
-    system->calculateForces();
-
-}
 
 void VelocityVerlet::halfKick(System *system, double dt)
 {
  //   cout << "Halfkick got called" << endl;
     //Halfkick shall calculate the velocity half a step forward
-    for(int i = 0; i < system->atoms().size(); i++)
+    for(int i = 0; i < int(system->atoms().size()); i++)
     {
         Atom *atom = system->atoms()[i];
         double halfTimeStepByMass = dt/(2*atom->mass());
@@ -41,7 +34,7 @@ void VelocityVerlet::move(System *system, double dt)
 
 
 //    cout << "Before move: " << system->atoms()[0]->position << endl;
-    for(int i = 0; i < system->atoms().size(); i++)
+    for(int i = 0; i < int(system->atoms().size()); i++)
     {
         Atom *atom = system->atoms()[i];
         atom->position.addAndMultiply( atom->velocity, dt) ; // r(t+ dt)= r(t) + v(t+dt/2)*dt
@@ -58,18 +51,15 @@ void VelocityVerlet::integrate(System *system, double dt)
         system->calculateForces();
         m_firstStep = false;
     }
+
     halfKick(system, dt);                       //This implements the first step, v(t + dt/2)= v(t) + F(t)/m*dt/2
 
     move(system, dt);                           //System is moved, r(t+ dt)= r(t) + v(t+dt/2)*dt
 
     system->applyPeriodicBoundaryConditions();  //Put's them inside the boundary again
 
-
     system->calculateForces();                  //New forces should be calculated, according to F(t+dt) = - d/dr U(r(r+dt))
-
-
 
     halfKick(system, dt);                       //Kicks the second half of the step v(t+dt)=v(t+dt/2) + F(t+dt)/m*dt/2
 
-//    cout << system->atoms()[0]->force  << endl;
 }
