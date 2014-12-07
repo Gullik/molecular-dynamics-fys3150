@@ -39,6 +39,10 @@ public:
     void setThermostat(Thermostat *thermostat) {m_thermostat = thermostat; }
     Thermostat *thermostat() {return m_thermostat; }
 
+    // Save and load in binary format
+    void save(string filename, System *system);
+    void load(string filename, System *system);
+
 //    NeighborList *neighborList() {return m_neighborList;}
 
     // Setters and getters

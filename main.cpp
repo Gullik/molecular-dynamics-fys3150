@@ -14,11 +14,17 @@
 #include <unitconverter.h>
 #include <time.h>
 
+#include <sstream>
+#include <stdlib.h>
+
 using namespace std;
 
-int main()
+
+
+int main(int argc, char* argv[])
 {
-    double dt = UnitConverter::timeFromSI(1e-15); // You should try different values for dt as well.
+
+    //Setting a lot of variables and initiliazing different parts of the system and objects in it
 
     cout << "One unit of length is " << UnitConverter::lengthToSI(1.0) << " meters" << endl;
     cout << "One unit of velocity is " << UnitConverter::velocityToSI(1.0) << " meters/second" << endl;
@@ -28,21 +34,61 @@ int main()
     cout << "One unit of pressure is " << UnitConverter::pressureToSI(1.0) << " Pa" << endl;
     cout << "One unit of energy is " << UnitConverter::energyToSI(1.0) << " J" << endl;
 
-    double latticeConstant = UnitConverter::lengthFromAngstroms(5.26);  //Not really necessary since the programs units already uses Angrstoms, but
-    double sigma = UnitConverter::lengthFromAngstroms(3.405);           //safer to keep in case it changes base units
+    int numTimeSteps = 2000;
+    double dt = UnitConverter::timeFromSI(1e-15);
+    int numUnitCells = 10;
+    float latticeConstant = 5.26;
+    bool loadState = false;
+    bool thermostatEnabled = false;
+    float temperature = 300;
+    double sigma = UnitConverter::lengthFromAngstroms(3.405);
     double epsilon = UnitConverter::energyFromSI(119.8*UnitConverter::kb);
-    int gridNodes = 6;      //After the neighborlists implementation it needs enough gridnodes to have 3+ neighors to work properly
-    double cutOffLength = 3*sigma;
+    double cutOffLength = 2*sigma;
+
+    if(argc>1) {
+        dt = UnitConverter::timeFromSI(atof(argv[1])*1e-16);
+        numTimeSteps = atoi(argv[2]);
+        numUnitCells = atoi(argv[3]);
+        latticeConstant = atof(argv[4]);
+        loadState = atoi(argv[5]);
+        thermostatEnabled = atoi(argv[6]);
+        temperature = atof(argv[7]);
+    }
 
 
+    //Let python and the framework handle the statefile instead, just store it as the statefile and saves and python
+    //copies the file if it is needed
+    string statefile = "state";
+
+
+    //Initializing
     System system;
-    system.createFCCLattice(gridNodes, latticeConstant);
-    system.setPotential(new LennardJones(sigma, epsilon));
-    system.setIntegrator(new VelocityVerlet());
-    system.setNeighborList(new NeighborList(cutOffLength, system.systemSize()));
-    system.setThermostat(new Berendsen(UnitConverter::temperatureFromSI(200), 0.1));
+    //Creating a new system of atoms, or loading up a ready made state
+    if(!loadState)
+    {
+        system.createFCCLattice(numUnitCells, latticeConstant);
+        system.removeMomentum();
+        system.setPotential(new LennardJones(sigma, epsilon));
+        system.setIntegrator(new VelocityVerlet());
+        system.setNeighborList(new NeighborList(cutOffLength, system.systemSize()));
+        system.setThermostat(new Berendsen(UnitConverter::temperatureFromSI(temperature), 0.1));
+    }
+    else
+    {
+        cout << "Loaded statefile " << statefile << endl;
+        system.load(statefile, &system);
+        system.setPotential(new LennardJones(sigma, epsilon));
+        system.setIntegrator(new VelocityVerlet());
+        system.setNeighborList(new NeighborList(cutOffLength, system.systemSize()));
+        system.setThermostat(new Berendsen(UnitConverter::temperatureFromSI(temperature), 0.1));
+    }
 
-    system.removeMomentum();
+    if(thermostatEnabled)
+    {
+        cout << "Turned on thermostat" << endl;
+        system.thermostat()->turn_on();
+    }
+
 
     vec3 systemSize = system.systemSize();
 
@@ -62,14 +108,8 @@ int main()
     movie->saveState(&system); //The initial state should also be recorded
 //    statisticsSampler->sample(&system);
 
-
-
-    for(int timestep=0; timestep < 1000 ; timestep++) {
+    for(int timestep=0; timestep < numTimeSteps ; timestep++) {
         system.step(dt);
-
-        if(timestep == 300)
-            system.thermostat()->turn_off();
-
 
         if( timestep % 10 == 0)
             statisticsSampler->sample(&system);
@@ -86,6 +126,12 @@ int main()
     double time = 1.0*(end - start)/CLOCKS_PER_SEC;
 
    cout << "The program spent " << time << " s to calculate the steps, with " << system.atoms().size() << " atoms" <<  endl;
+
+   //Saving the state
+   system.save(statefile, &system);
+   cout << "Saved state as " << statefile << endl;
+
+
 
     return 0;
 }

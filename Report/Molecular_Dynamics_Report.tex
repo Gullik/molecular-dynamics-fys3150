@@ -36,7 +36,7 @@
 \lstset{breaklines}
 
 \title{ Molecular Dynamics \\ FYS-3150 }
-\author{Gullik Vetvik Killie }
+\author{Candidate nr. 18 }
 
 \begin{document}
 
@@ -44,30 +44,19 @@
 
 \tableofcontents
 
-\newpage
-Notes
-\begin{itemize}
-\item Is it not the Leapfrog algorithm?
-\item Need to invent some unit test to implement, ask for ideas
-\item Is it necessary to compute potential? Analytical form of force should be enough. Loss of computing speed when not caring about potential
-\item Dipoles? Should form crystals
-\item Magnetic force
-\item Different molecules
-\item Crystals mixed with liquids
-\item Unit Test, check that it stays stable if temp is zero, then forces should be zero for crystal configuration.
-\end{itemize}
+\section{Part 1:}
 
-\section{Task a: Periodic boundary conditions}
+\subsection{Task a: Periodic boundary conditions}
 	This task was implemented in the function applyPeriodicBoundaryConditions() and the program can be found at the github page \cite{myGit}.
 \\ \\
 	\noindent Since we have limited computational power we are only working on a small piece of argon material, to get away from boundary cases we simulate a system of infinite size by implementing periodic boundary conditions. This is done by confining the atoms in a box and each time a particle reaches the end of the box it is put to the other side.
 
-\section{Task b: Removing momentum}
+\subsection{Task b: Removing momentum}
 	This task is implemented in the function removeMomentum().
 \\ \\
 	\noindent Since all the atoms are given random velocities the net momentum is not zero and the cloud will drift. This is solved by calculating the total momentum of all the atoms, and then subtracting a fraction of the total momentum from each atom so the total momentum ends up being zero.
 
-\section{Task c: Putting the atoms on a lattice}
+\subsection{Task c: Putting the atoms on a lattice}
 	This task is implemented in the function createFCCLattice()
 \\ \\
 	\noindent The noble gas argon should have a stable lattice structure when a solid, by letting the system start in a stable situation we avoid a lot of energy to be infused into the systems temperature due to it minimizing potential energy. The implementation is done by going through several nodes, \(R_i\), put on a grid in the box and then placing 4 atoms around each node. Let \(c_l\) be the length between nodes.
@@ -87,67 +76,10 @@ Notes
 	\end{align*}
 
 
-\section{Task d: Implementing a Verlet integrator}
-	Se subsection \ref{sub:verlet}
-
-\section{Task e: Computing forces}
-	See subsection \ref{sub:potential}
-
-\section{Task f: Calculating some statistical properties}
-	\subsubsection{Kinetic energy}
-
-		The kinetic energy is found trough adding up the kinetic energy for all the atoms separately. It is straight forward and done in a function, in the statisticsSampler class, called sampleKineticEnergy(). It goes through all the atoms and adds it's contribution to the total kinetic energy. 
-
-		\[
-		E_k = \sum\limits^{N_{atoms}}_{i=1}{\frac{1}{2}m_i v_i^2}
-		\]
-
-		\noindent Then it also stores the instantaneous temperature of the substance which is given by the equipartition theorem \( \langle E_K \rangle = \frac{2}{3} k_B N_{atoms} T \). By looking at the kinetic energy in a time-instant instead of averaging it we get an instantaneous temperature.
-\\ \\
-		\noindent All of this is stored together with the potential energy to a text file "./statisticalResults/statisticalValues.tsv" which can be plotted by the python program plots.py.
-
-\section{Task g: implementing Neighbor cells}
-	\begin{table}
-		\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
-		\hline
-			\(N_{atoms}\)	&	4 			&	32			&	108			&	256		&	500		&	864		& 1372		&	2048
-			\\ \hline
-			time (s)		&	0.003539	&	0.054251	&	0.274064	&	1.22426	&	3.96325	&	11.3712	& 28.3554	& 62.9434 
-			\\ \hline
-			time (s) with list & -			& 0.179424		&	1.74696		&	2.89621	&	9.14402	&	13.3765	& 33.5662	& 39.6798
-			\\ \hline
-		\end{tabular}
-		\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}
-	\label{tab:time_spent}
-	\end{table}
-
-	Table \ref{tab:time_spent} shows the time spent computing with different amount of atoms in the system, as the system increases the time is increasing fast and we can see the need to implement neighbor cells. The time is increasing fast because the program has to calculate the forces between all the atoms and that is of the order \(\order{N^2}\). By only calculating the nearby atoms, which will be the ones affecting each other the most, the time taken will mostly increase linearly.
-\\ \\
-	\noindent The force is mostly ignorable outside a distance of \(3 \sigma \), see figure \ref{fig:force}.
-
-	\begin{itemize}
-		\item Divide box into smaller boxes with \(l >3\sigma\), and put the cell layer class between the system and atoms.
-				\[\text{system} \rightarrow\text{cellbox} \rightarrow \text{atoms}\]
-		\item For each box go through all the boxes neighboring boxes. Boxes should be stored in three lists as \((i,j,k)\) and the neighboring boxes to box \((i,j,k)\) are \( (i-1, j-1, k-1), (i-1,j-1,k) \) and going through all the combinations to \( (i+1,j+1,k+1) \)
-		\item Each atom needs an additional box assignment property
-		\item Calculate the forces for all the atoms belonging to the neighboring boxes
-	\end{itemize}
-
-	
+\subsection{Task d: Implementing a Verlet integrator}
 
 
-
-	\begin{figure}
-		\includegraphics[scale = 0.5]{forcePlot}
-		\caption{A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \(\sigma\) of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.}
-		\label{fig:force}
-	\end{figure}
-
-
-
-\section{Theory}
-	\subsection{Verlet integrator}
-		\label{sub:verlet}
+	\label{sub:verlet}
 		The Integrator is a widely used integrator in  molecular dynamics \cite{compPhys} because of it's properties as a symplectic integrator which means that it conserves areas in phase space very well and it allows stable integration of the equation of motion \cite{aBInitio}. Newton's second law for for a particle in our molecule ensemble reads:
 
 		\[m\pdv[2]{x_{i}}{t} = F_{i}\]
@@ -185,9 +117,9 @@ Notes
 		v_i(t+h) &= v_i(t+\frac{h}{2})  +  \frac{h}{2}\frac{F_i(t+ \frac{h}{2})}{m} + \order{h^2} 
 		\end{align*}
 
+\subsection{Task e: Computing forces}
 
-	\subsection{Lennard-Jones Potential and force between two molecules}
-		\label{sub:potential}
+\label{sub:potential}
 		We will be using the Lennard-Jones potential to approximate the forces between the molecules, which work quite well, given it's simplicity, for neutral particles, especially noble gases, as we are dealing with in this study \cite{Wiki}. The formula is given below.
 
 		\[
@@ -232,7 +164,21 @@ Notes
 		\item Add the force to both particles force account, halves the necessary computations. One positive one negative
 		\end{itemize}
 
-	\subsection{Cycling thourh the neighbors}
+
+\subsection{Task f: Calculating some statistical properties}
+	\subsubsection{Kinetic energy}
+
+		The kinetic energy is found trough adding up the kinetic energy for all the atoms separately. It is straight forward and done in a function, in the statisticsSampler class, called sampleKineticEnergy(). It goes through all the atoms and adds it's contribution to the total kinetic energy. 
+
+		\[
+		E_k = \sum\limits^{N_{atoms}}_{i=1}{\frac{1}{2}m_i v_i^2}
+		\]
+
+		\noindent Then it also stores the instantaneous temperature of the substance which is given by the equipartition theorem \( \langle E_K \rangle = \frac{2}{3} k_B N_{atoms} T \). By looking at the kinetic energy in a time-instant instead of averaging it we get an instantaneous temperature.
+\\ \\
+		\noindent All of this is stored together with the potential energy to a text file "./statisticalResults/statisticalValues.tsv" which can be plotted by the python program plots.py.
+
+\subsection{Task g: implementing Neighbor cells}
 	A simple system of \(3\cross 3\) neighbors, see figure \ref{fig:neighbor_grid} will have all the properties and connections of a larger system, since a neighbor is only connected to the neighbors bordering it. Let us choose the neighbor in the center, \(111\),  and find the neighbors we must go through to find to let it interact with each of it's neighbors once. First we let it interact with the top layer, \ref{fig:top}, and then we note that it is not necessary to let it interact with the bottom layer, since all the cells in that layer will interact with the choosen cell, \(111\). Then we fill the remainer of the front, 
 
 	\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
@@ -370,10 +316,102 @@ Notes
 	       	\caption{Then we let the center cell interact with side, j-direction and all the neighboring cells to cell \(111\) is interacted with, or interacts with cell \(111\) when all the cells are run trough.}
 	       	\label{fig:side}
 		\end{subfigure}
+		\caption{A schematic explanation of the algorithm to go through all the neighboring cells of a neighbor cell.}
 	\end{figure}
 		
 
-	\appendix
+
+
+
+	\begin{table}
+		\begin{tabular}{| c | c | c | c | c | c | c | c | c |}
+		\hline
+			\(N_{atoms}\)	&	4 			&	32			&	108			&	256		&	500		&	864		& 1372		&	2048
+			\\ \hline
+			time (s)		&	0.003539	&	0.054251	&	0.274064	&	1.22426	&	3.96325	&	11.3712	& 28.3554	& 62.9434 
+			\\ \hline
+			time (s) with list & -			& 0.179424		&	1.74696		&	2.89621	&	9.14402	&	13.3765	& 33.5662	& 39.6798
+			\\ \hline
+		\end{tabular}
+		\caption{This table shows time to compute 100 timesteps with different amount of atoms in the model. The time is increasing much faster than linearly. After the neighborlists are implemented it is slower on very few atoms, but it grows slower and spends less time aabove 2048 atoms.}
+	\label{tab:time_spent}
+	\end{table}
+
+	Table \ref{tab:time_spent} shows the time spent computing with different amount of atoms in the system, as the system increases the time is increasing fast and we can see the need to implement neighbor cells. The time is increasing fast because the program has to calculate the forces between all the atoms and that is of the order \(\order{N^2}\). By only calculating the nearby atoms, which will be the ones affecting each other the most, the time taken will mostly increase linearly.
+\\ \\
+	\noindent The force is mostly ignorable outside a distance of \(3 \sigma \), see figure \ref{fig:force}.
+
+	\begin{itemize}
+		\item Divide box into smaller boxes with \(l >3\sigma\), and put the cell layer class between the system and atoms.
+				\[\text{system} \rightarrow\text{cellbox} \rightarrow \text{atoms}\]
+		\item For each box go through all the boxes neighboring boxes. Boxes should be stored in three lists as \((i,j,k)\) and the neighboring boxes to box \((i,j,k)\) are \( (i-1, j-1, k-1), (i-1,j-1,k) \) and going through all the combinations to \( (i+1,j+1,k+1) \)
+		\item Each atom needs an additional box assignment property
+		\item Calculate the forces for all the atoms belonging to the neighboring boxes
+	\end{itemize}
+
+	
+	\begin{figure}
+		\includegraphics[scale = 0.5]{forcePlot}
+		\caption{A picture over the force felt between two particles due to the Lennard-Jones potential. At approximately 3 \(\sigma\) of length the magnitude of the force closes to zero and we can ignore the contribution of atoms further away from each other.}
+		\label{fig:force}
+	\end{figure}
+
+\subsection{Task g: Implementing a thermostat}
+	After initializing the system, it will after while stabilize with a different temperature than it was initialized in. So we will need to implement a thermostat and let that run for a while to get the system to maintain that temperature that we want to measure statistical properties at. In this project we will implement a Berendsen thermostat, that works by first calculating a scalar value ,\(\gamma\), for how much the temperature of the system is different from the wanted temperature, see equation \eqref{eq:berentsen}, where \(\gamma\) is the adjustment scalar, \( \Delta t \) is the timestep, \( T_Bath \text{ and } T\) is the measured and wanted temperatures, \(\tau\) is a relaxation factor. 
+
+	\begin{align}
+		\gamma &= \sqrt{ 1 - \frac{\Delta t}{\tau} \left( \frac{T_{Bath}}{T} - 1 \right) } \label{eq:berentsen}
+	\end{align}
+
+	Then all of the individual atoms velocities are multiplied with the factor \( \gamma\) and the temperature is increased, or decreases, to get closer to the wanted temperature.
+
+\section{Part 2: Saving and loading in binary format}
+\subsection{Task a:}
+	The save and load functions, in binary, was implemented as members in the system class and are called load() and save. They load all the positions and velocities of all the particles in the system.
+
+\subsection{Task b: Writing the statistical properties to file }
+	In the class statisticsSampler there all the statistical properties are sampled and written to a file. They are stored as "./statisticalResults/statisticalValues.csv"
+
+
+\subsection{Task c: Measure the pressure}
+	
+	The pressure for a molecular system can be calculated with the following equation, \eqref{eq:press} (for an NVT ensemble, it also works quite well for an NVE ensemble), where $\rho_n$ is the number density, $k_B$ is the Boltzmann constant, $T$ is the temperature, $V$ is the volume, $\vec r_i$ is the position of atom $i$ and $\vec F_i$ is the total force on atom $i$:
+
+	\begin{align}
+    P &= \rho_n k_B T + \frac{1}{3V}\Bigg \langle \sum_{i=1}^N \vb F_i \cdot \vb r_i \Bigg\rangle \label{eq:press}
+    \intertext{The force on one atom is the sum of all the force felt from all the other atoms \( \vb{F}_i = \sum_{j=1, i \ne j}^N \vb F_{ij } \)}
+    P &= \rho_n k_B T + \frac{1}{3V}\Bigg \langle \sum_{i=1}^N \left( \sum_{j=1, i \ne j}^N \vb F_{ij}  \right)\cdot \vb r_i \Bigg\rangle
+    \intertext{The \(\vb r_{i} \) can be moved into the \(j-\)summation since it is not dependent on \(j\)}
+    P &= \rho_n k_B T + \frac{1}{3V}\Bigg \langle \sum_{i=1}^N \left( \sum_{j=1, j \ne i}^N \vb F_{ij}  \cdot \vb r_i  \right) \Bigg\rangle
+	\end{align}
+
+
+	\begin{align}
+    P = \rho_n k_B T + \frac{1}{3V}\Bigg\langle \sum_{i>j} \vec r_{ij} \cdot \vec F_{ij} \Bigg\rangle,
+	\end{align}
+
+\subsection{Task d:}
+	Here we will start up a new system of \(4000\) atoms with an initial temperature of \(300 \)K. Then let it run with no modifications and let it run. As can be seen in figure the kinetic
+
+
+\subsection{Task e: Python framework for running simulations}
+	To be able to easily run several runs of the simulation a small python framework is adapted to do this. It consists of the two python programs run.py and mdconfig.py. The latter consists of a several different configurations to run the c++ simulation of the argon gas. It has a MD class which contains configurations to tell the simulation to create a new FCC lattice, run the simulation with the Berendsen thermometer on and one for letting it run, along with saving and loading functions. run.py is the overarching program where what we want to simulate is defined and the functions from mdconfig.py is called.
+
+\subsection{Task f: Measure the heat capacity}
+	
+\subsection{Task g: Pressure vs number density}
+	As the lattice constant is changed, the volume of our gas will change and subsequently the number density. The length in one direction  is dependent on the number of unit cells and the distance between them. Let \(V\), \(b\) and \(U\) be the volume, lattice constant and unit cells respectively.
+
+	\begin{align}
+	V &= (b U)^3
+	\intertext{The number density is then}
+	\rho _n &= \frac{N_a}{V} =  \frac{N}{U^3}b^{-3}
+	\intertext{The number of atoms is dependent on the number of unit cells chosen, with four per unit cell in each dimension}
+	\rho _n &= \frac{4*U^3}{U^3}b^{-3} = \frac{4}{b^3}
+	\end{align}
+
+
+\appendix
 	\section{Unit scheme}
 		The program uses a more natural set of units which let's Boltzmann's constant be 1.
 
@@ -397,6 +435,8 @@ Notes
 	\\
 	k_B &= 1 \; \frac{\text{energy unit}}{\text{temperature unit}}
 	\end{align}
+
+
 
 
 

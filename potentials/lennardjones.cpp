@@ -16,7 +16,7 @@ LennardJones::LennardJones(double sigma, double epsilon) :
 
 void LennardJones::calculateForces(System *system)
 {
-//    cout << "Got into potential" << endl;
+
     //This should calculate the force between to particles according to the gradient
     //of the L-J potential U = -4 E ((o/r)^12-(o/r)^6).
     //
@@ -28,7 +28,6 @@ void LennardJones::calculateForces(System *system)
     //so if every atom in a neighborhood calculates the force between them and the next neighborhoods, all the bordering neighborhoods should
     //get calculated.
     //At the endpoints it needs to be modified
-
 
 
     int noOfNeighbors = system->list()->noOfNeighbors();
@@ -71,10 +70,6 @@ void LennardJones::calculateForces(System *system)
 
                 if(k == 0)
                     prev_k = noOfNeighbors - 1;
-
-
-
-
 
                 //With itself
                 calculateForcesInsideCell(vec3(i,j,k),system);
@@ -122,9 +117,11 @@ void LennardJones::calculateForcesInsideCell(vec3 neighborPosition, System *syst
     double forceMagnitude = 0;
     double forceConstant = 24*m_epsilon/m_sigma;
     double helpTerm = 0;
+    double volume = pow(system->systemSize().x,3);
 
     double cutOffPotentialEnergy = 4*m_epsilon*(pow(m_sigma/system->list()->cutOffLength(),12)
                                                 - pow(m_sigma/system->list()->cutOffLength(),6));
+
 
     for(int i = 0; i < noOfAtoms; i++)
     {
@@ -145,7 +142,6 @@ void LennardJones::calculateForcesInsideCell(vec3 neighborPosition, System *syst
 
             force = vecBetween/lengthBetween * forceMagnitude; //Normalizing the vector to correspond to k_ij / |r_ij|
 
-
             atoms[i]->force.addAndMultiply(force, -1);
             atoms[j]->force.add(force);
 
@@ -158,6 +154,11 @@ void LennardJones::calculateForcesInsideCell(vec3 neighborPosition, System *syst
             helpTerm = pow(m_sigma/lengthBetween, 6);
 
             m_potentialEnergy += 4*m_epsilon*(helpTerm*helpTerm - helpTerm) - cutOffPotentialEnergy; //The potential Energy should be counted only once for each molecule pair?
+
+            // This calculates the pressure due to forces between the particles, the constant part of the pressure due to rho_n*k_b*T
+            // is added in the statisicssampler function.
+            //So this calculates one part one of the summation in sum_(i>j) F_ij*r_ij
+            m_pressure += 1.0/(3.0*volume) * forceMagnitude;
 
         }
 
@@ -191,6 +192,8 @@ void LennardJones::calculateForcesBetweenCells(vec3 neighborPositionA, vec3 neig
     double Lx = system->systemSize().x;
     double Ly = system->systemSize().y;
     double Lz = system->systemSize().z;
+
+    double volume = pow(system->systemSize().x,3);
 
     double cutOffPotentialEnergy = 4*m_epsilon*(pow(m_sigma/system->list()->cutOffLength(),12)
                                                 - pow(m_sigma/system->list()->cutOffLength(),6));

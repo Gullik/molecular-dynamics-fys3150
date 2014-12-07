@@ -8,11 +8,12 @@ ofstream myfile;
 StatisticsSampler::StatisticsSampler()
 {   
     //Clear the old statistical file and prepares a new one
-        ofstream("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.tsv",ios::trunc);
+        ofstream("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.csv",ios::trunc);
 
         fstream myfile;
-        myfile.open("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.tsv");
-        myfile << "Time (?)"  << "\t" "Temperature" << "\t" << "Kinetic energy (?)" << "\t" << "Potential Energy (?)" << endl;
+        myfile.open("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.csv");
+        myfile << "Time (?)"  << "\t" << "Temperature" << "\t" << "Kinetic energy (?)" << "\t" << "Potential Energy (?)" <<
+                  "\t" << "Number Density" << "\t" << "Pressure" << endl;
         myfile.close();
 }
 
@@ -26,6 +27,17 @@ void StatisticsSampler::sample(System *system)
     // Here you should measure different kinds of statistical properties and save it to a file.
     sampleKineticEnergy(system);                //Also calculates the instanteneous temperature
     samplePotentialEnergy(system);
+    sampleNumberDensity(system);
+    samplePressure(system);
+
+    //Write the measured values to file
+
+    myfile.open ("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.csv", ios::app);
+    myfile << system->currentTime() << "\t" << m_temperature << "\t" << m_kineticEnergy << "\t" << m_potentialEnergy <<
+              "\t" << m_numberDensity << "\t" << m_pressure <<endl;
+    myfile.close();
+
+
 }
 
 void StatisticsSampler::sampleKineticEnergy(System *system)
@@ -44,17 +56,39 @@ void StatisticsSampler::sampleKineticEnergy(System *system)
 
     temperature = 2.0/3.0*kineticEnergy / system->atoms().size();
 
-    myfile.open ("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.tsv", ios::app);
-             myfile << endl <<system->currentTime() << "\t" <<  UnitConverter::temperatureToSI( temperature )  <<"\t" << kineticEnergy << "\t";
-    myfile.close();
+    //Stores it in the statisticsSampler
+    m_kineticEnergy = kineticEnergy;
+    m_temperature = temperature;
 
 
 }
 
 void StatisticsSampler::samplePotentialEnergy(System *system)
 {
-    myfile.open ("../molecular-dynamics-fys3150/statisticalResults/statisticalValues.tsv", ios::app);
-             myfile << system->potential()->potentialEnergy();
-    myfile.close();
+
+
+    m_potentialEnergy = system->potential()->potentialEnergy();
 }
 
+void StatisticsSampler::sampleNumberDensity(System *system)
+{
+    double volume = system->systemSize().length();
+    int noOfAtoms = system->atoms().size();
+
+    double numberDensity = 1.0 * noOfAtoms / volume;
+
+
+    m_numberDensity = numberDensity;
+
+}
+
+void StatisticsSampler::samplePressure(System *system)
+{
+
+    //This adds together the pressure resulting from the temperature and the pressure calculated from
+    //the force felt between particles calculated in the force loop in the potential.
+
+    double pressure = m_numberDensity * m_temperature + system->potential()->pressure() ;
+
+    m_pressure = pressure;
+}

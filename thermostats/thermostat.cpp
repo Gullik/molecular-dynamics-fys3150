@@ -2,7 +2,7 @@
 #include "thermostat.h"
 
 Thermostat::Thermostat():
-    m_switch(true)
+    m_switch(false)
 {
 
 }

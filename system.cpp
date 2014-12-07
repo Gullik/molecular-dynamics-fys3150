@@ -4,6 +4,11 @@
 #include <unitconverter.h>
 #include <math.h>
 #include <lists/neighborlist.h>
+#include <io.h>
+#include <cstdlib>
+
+
+using CompPhys::vec3;
 
 System::System() :
     m_potential(0),
@@ -144,11 +149,83 @@ void System::calculateForces() {
     m_list->sortAtoms(this);
 
     m_potential->setPotentialEnergy(0);
+    m_potential->setPressure(0);
     m_potential->calculateForces(this);
-
 
 }
 
+void System::save(string filename, System *system){
+
+    const char *filenameChar = filename.c_str();
+
+    ofstream file (filenameChar, ios::out | ios::binary);
+        if(!file.is_open()) {
+            cerr << "Could not open file " << filename << ". Aborting!" << endl;
+            exit(1);
+        }
+
+        int numberOfPhaseSpaceCoordinates = 6*system->atoms().size();
+        double *phaseSpace = new double[numberOfPhaseSpaceCoordinates];
+        vec3 systemSize = system->systemSize();
+
+        int phaseSpaceCounter = 0;
+        for(int i=0;i<system->atoms().size();i++) {
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->position.x;
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->position.y;
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->position.z;
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->velocity.x;
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->velocity.y;
+            phaseSpace[phaseSpaceCounter++] = system->atoms()[i]->velocity.z;
+        }
+
+        int numberOfAtoms = system->atoms().size();
+
+        file.write (reinterpret_cast<char*>(&numberOfAtoms), sizeof(int));
+        file.write (reinterpret_cast<char*>(phaseSpace),
+            numberOfPhaseSpaceCoordinates*sizeof(double));
+        file.write (reinterpret_cast<char*>(&systemSize.x), 3*sizeof(double));
+
+        file.close();
+        delete phaseSpace;
+}
+
+void System::load(string filename, System *system) {
+
+    const char *filenameChar = filename.c_str();
+
+    ifstream file (filenameChar, ios::in | ios::binary);
+    if(!file.is_open()) {
+        cerr << "Could not open file " << filename << ". Aborting!" << endl;
+        exit(1);
+    }
+
+    int numberOfAtoms;
+    file.read(reinterpret_cast<char*>(&numberOfAtoms), sizeof(int));
+
+    double *phaseSpace = new double[6*numberOfAtoms];
+    file.read(reinterpret_cast<char*>(phaseSpace), 6*numberOfAtoms*sizeof(double));
+
+    vec3 systemSize;
+    file.read(reinterpret_cast<char*>(&systemSize.x), 3*sizeof(double));
+    system->setSystemSize(systemSize);
+
+    int phaseSpaceCounter = 0;
+    double mass = 39.948;
+    system->atoms().clear();
+    for(int i=0;i<numberOfAtoms;i++) {
+        Atom *atom = new Atom(mass);
+        atom->position = vec3(phaseSpace[phaseSpaceCounter++],
+            phaseSpace[phaseSpaceCounter++],
+            phaseSpace[phaseSpaceCounter++]);
+        atom->velocity = vec3(phaseSpace[phaseSpaceCounter++],
+            phaseSpace[phaseSpaceCounter++],
+            phaseSpace[phaseSpaceCounter++]);
+        system->atoms().push_back(atom);
+    }
+
+    file.close();
+    delete phaseSpace;
+}
 
 
 void System::step(double dt) {

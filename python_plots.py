@@ -1,45 +1,64 @@
 import numpy as np
 import pylab as py
 
-# Plotting of the solutions to the first 
-statisticalValues = np.genfromtxt('statisticalResults/statisticalValues.tsv', delimiter='\t')
+def plot_function():
 
-time = statisticalValues[1: , 0]
-temperature = statisticalValues[1: , 1]
-kineticEnergy = statisticalValues[1: , 2]
-potentialEnergy = statisticalValues[1: , 3]
+	# Plotting of the solutions to the first 
+	statisticalValues = np.genfromtxt('statisticalResults/statisticalValues.csv', delimiter='\t')
 
-totalEnergy = kineticEnergy + potentialEnergy
+	timeToPicoSeconds = 1.00224e-13 / 10e-12
+	temperatureToKelvin = 119.735
+	energyToJoule = 1.65313e-21
+	pressureToPa = 1.65313e+09
 
-relativeVariation = np.abs(( np.max(totalEnergy) - np.min(totalEnergy) ) /np.average(totalEnergy))
+	time = timeToPicoSeconds * statisticalValues[1: , 0]
+	temperature = temperatureToKelvin * statisticalValues[1: , 1]
+	kineticEnergy = energyToJoule * statisticalValues[1: , 2]
+	potentialEnergy = energyToJoule * statisticalValues[1: , 3]
+	pressure = statisticalValues[1: , 5]
 
+	totalEnergy = kineticEnergy + potentialEnergy
 
-print "The total energy has a relative maxvariation of = " , relativeVariation
+	relativeVariation = np.abs(( np.max(totalEnergy) - np.min(totalEnergy) ) /np.average(totalEnergy))
 
+	print "The total energy has a relative maxvariation of = " , relativeVariation
 
-tempFigs = py.figure()
-py.plot(time, temperature)
-py.title('Temperature of argon gas')
-py.savefig('./Report/temperature.png')
+	tempFigs = py.figure()
+	py.plot(time, temperature)
+	py.ylabel('Temperature in Kelvin')
+	py.xlabel('Time in picoseconds')
+	py.title('Temperature of argon gas')
+	py.savefig('./Plots/temperature.png')
 
-energyFig = py.figure()
+	energyFig = py.figure()
 
-py.subplot(211)
-py.plot(time ,kineticEnergy)
-py.title('Kinetic energy in argon gas')
+	py.subplot(211)
+	py.plot(time ,kineticEnergy)
+	py.ylabel('Energy in Joule')
+	py.xlabel('Time in picoseconds')
+	py.title('Kinetic energy in argon gas')
 
+	py.subplot(212)
+	py.plot(time , potentialEnergy)
+	py.ylabel('Energy in Joule')
+	py.xlabel('Time in picoseconds')
+	py.title('Potential energy in argon gas')
+	py.savefig('./Plots/energyFig.png')
 
-py.subplot(212)
-py.plot(time , potentialEnergy)
-py.title('Potential energy in argon gas')
-py.savefig('./Report/energyFig.png')
+	totalEnergyFig = py.figure()
+	py.plot(time , totalEnergy)
+	py.ylabel('Energy in Joule')
+	py.xlabel('Time in picoseconds')
+	py.title('Total energy')
+	py.savefig('./Plots/totalEnergyFig.png')
 
-totalEnergyFig = py.figure()
-py.plot(time , totalEnergy)
-py.title('Total energy')
-py.savefig('./Report/totalEnergyFig.png')
-
-# py.show()
+	pressurePlot = py.figure()
+	py.plot(time , pressure)
+	py.ylabel('Pressure in Pa')
+	py.xlabel('Time in picoseconds')
+	py.title('Pressure in the system')
+	py.savefig('./Plots/pressureFig.png')
+	# py.show()
 
 ## Plotting the force so we can estiamte when it approaches zero.
 
@@ -60,7 +79,7 @@ py.title('The force between to particles. sigma = 1, epsilon = 1')
 py.xlabel('Distance')
 py.ylabel('Force')
 
-py.savefig('./Report/forcePlot.png')
+py.savefig('./Plots/forcePlot.png')
 
 
 
