@@ -13,6 +13,7 @@ class MD:
 		self.thermostatEnabled = False
 		self.temperature = 1000
 		self.gaussianVelocities = True
+		self.nodes = 8
 
 	def run_command(self, cmd):
 		subprocess.call(cmd, shell=True)
@@ -22,7 +23,7 @@ class MD:
 			print "Executable "+self.name+" does not exist, aborting!"
 			exit()
 		
-		command = "./%s %f %d %d %f %d %d %f, %d" % (self.name, self.dt, self.numberOfTimesteps, self.numberOfUnitCells, 
+		command = " ./%s %f %d %d %f %d %d %f %d" % (self.name, self.dt, self.numberOfTimesteps, self.numberOfUnitCells, 
 													self.FCCLatticeConstant, self.loadState, self.thermostatEnabled, 
 													self.temperature, self.gaussianVelocities)
 		print "Running command: ", command

@@ -31,7 +31,7 @@ def plot_function():
 	py.title('Temperature of argon gas')
 	py.savefig('../data/Plots/temperature.png')
 
-	energyFig = py.figure()
+	# energyFig = py.figure()
 
 	# py.subplot(211)
 	# py.plot(time ,kineticEnergy)

@@ -9,20 +9,25 @@ program = MD(dt=10, name= "../build-molecular-dynamics-Desktop-Debug/molecular-d
 #and temperatures
 ###########################################################################
 
-# # # Create new FCC lattice
-# program.runNewSystem(numberOfUnitCells = 10, FCCLatticeConstant = 5.26) # lattice constant in angstroms
-
-# # # Enable the thermostat for a while to reach a desired temperature. You need to figure out how long it needs to run.
-# program.runThermostat(temperature = 200, timesteps = 1000)
-# # # program.saveState(path="states/statesTermostat-" + str(latticeConstant))
-# plot_function()
 
 
-# # program.loadSavedState(path="states/statesTermostat-" + str(latticeConstant))
-# # # Thermalize for some time (Note: thermalizing means without the thermostat, equilibrate). Here as well you need to figure out how long it needs to thermalize before we start sampling
-# program.runThermalize(timesteps = 1000)
-# plot_function()
-# # program.saveState(path="../data/states/statesThermalized-lattice" + str(latticeConstant) + "-temperature-" + str(temperature))
+def testRun():
+	# # # Create new FCC lattice
+	program.runNewSystem(numberOfUnitCells = 12, FCCLatticeConstant = 5.26) # lattice constant in angstroms
+
+	# # Enable the thermostat for a while to reach a desired temperature. You need to figure out how long it needs to run.
+	# program.runThermostat(temperature = 200, timesteps = 1000)
+	# program.saveState(path="states/statesTermostat-" + str(latticeConstant))
+	# plot_function()
+
+
+	# # program.loadSavedState(path="states/statesTermostat-" + str(latticeConstant))
+	# # # Thermalize for some time (Note: thermalizing means without the thermostat, equilibrate). Here as well you need to figure out how long it needs to thermalize before we start sampling
+	program.runThermalize(timesteps = 1000)
+	plot_function()
+	# # program.saveState(path="../data/states/statesThermalized-lattice" + str(latticeConstant) + "-temperature-" + str(temperature))
+
+	return
 
 def runThermalizeStates():
 	for temperature in range (100, 1001,100):
@@ -96,7 +101,8 @@ def energyError():
 
 # runThermalizeStates()
 # uniformVelocityDistrution()
-energyError()
+# energyError()
+testRun()
 
 
 
